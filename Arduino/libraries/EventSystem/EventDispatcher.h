@@ -28,7 +28,7 @@
 #ifndef EVENTDISPATCHER_H
 #define EVENTDISPATCHER_H
 
-#include <WProgram.h>
+#include <Arduino.h>
 #include <Events.h>
 #include <EventQueue.h>
 

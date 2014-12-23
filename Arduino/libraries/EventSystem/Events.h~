@@ -28,7 +28,7 @@
 #ifndef EVENTS_H
 #define EVENTS_H
 
-#include <Arduino.h>
+#include <WProgram.h>
 
 // Some common events.
 // Codes 0..199 are available for

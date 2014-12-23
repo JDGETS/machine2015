@@ -28,7 +28,7 @@
 #ifndef EVENTQUEUE_H
 #define EVENTQUEUE_H
 
-#include <WProgram.h>
+#include <Arduino.h>
 #include <Events.h>
 
 class EventQueue {

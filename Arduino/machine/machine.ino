@@ -1,12 +1,29 @@
-#include <inb4.h>
 
-// the setup routine runs once when you press reset:
-void setup(){
- // put your steup code here, to run once: 
-  inb4::setup();
+
+
+
+#include <Arduino.h>
+#include <SoftwareSerial.h>
+
+
+#define SKETCH
+
+
+
+/// grep -r "string to search" .
+#include <INB4.h>
+//#include <inb4.h>
+
+ISR(TIMER1_OVF_vect)
+{
+    OCR1A =  LEFT_MOTOR_PWMVAL ;
+    OCR1B =  RIGHT_MOTOR_PWMVAL ;
 }
 
-void loop(){
- // put your main code here, to run repeatedly:
-  inb4::loop();
+void setup(){ 
+  INB4::setup(); 
 }
+void loop(){ 
+  INB4::loop(); 
+}
+
