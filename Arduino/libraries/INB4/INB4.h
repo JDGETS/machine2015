@@ -85,9 +85,33 @@ namespace States {
     typedef struct ParcoursSansLanceur ParcoursSansLanceur;
     typedef struct MonteeSansLanceur MonteeSansLanceur;
     typedef struct DecenteSansLanceur DecenteSansLanceur;
+
+    const unsigned short CHARGEMENT_BATTERIE_STATE_ID = 1;
+    const unsigned short NOUVELLE_POCHE_DANS_MAGASIN_STATE_ID = 2;
+
+    const unsigned short PARCOURS_AVEC_LANCEUR_STATE_ID = 3;
+    const unsigned short MONTEE_AVEC_LANCEUR_STATE_ID = 4;
+    const unsigned short DECENTE_AVEC_LANCEUR_STATE_ID = 5;
+
+    const unsigned short VIRAGE_ENTREE_ZONE_LANCEMENT_STATE_ID = 6;
+    const unsigned short ALIGNEMENT_REEDSWITCH_ZONE_LANCEMENT_STATE_ID = 7;
+    const unsigned short DEPLOIEMENT_CANON_STATE_ID = 8;
+
+    const unsigned short DEPLOIEMENT_LIMITSWITCHS_STATE_ID = 9;
+    const unsigned short VERIFICATION_DECLENCHEMENT_LIMITSWITCHS_STATE_ID = 10;
+
+    const unsigned short SEQUENCE_CALCUL_ROTATION_CIBLE_STATE_ID = 11;
+    const unsigned short SEQUENCE_LANCEMENT_POCHES_STATE_ID = 12;
+
+    const unsigned short SEPARATION_LANCEUR_STATE_ID = 13;
+    const unsigned short VIRAGE_SORTIE_ZONE_LANCEMENT_STATE_ID = 14;
+
+    const unsigned short PARCOURS_SANS_LANCEUR_STATE_ID = 15;
+    const unsigned short MONTEE_SANS_LANCEUR_STATE_ID = 16;
+    const unsigned short DECENTE_SANS_LANCEUR_STATE_ID = 17;
 }
 
-enum MotorID { MOTOR_LEFT = 0, MOTOR_RIGHT = 1 };
+enum MotorID { MOTOR_LEFT = 1, MOTOR_RIGHT = 2 };
 enum DirectionID { TURN_LEFT = 0, TURN_RIGHT = 1, FORWARD = 2, BACKWARD = 3 };
 
 class INB4 {
@@ -104,6 +128,7 @@ extern XBeeComm XBEECOMM;
 extern LimitSwitch LIMIT_SWITCH;
 extern OpticalSensor OPTICAL_SENSOR;
 
+extern float RIGHT_MOTOR_RATIO;
 extern MotorPinOut LEFT_MOTOR_PIN_OUT;
 extern MotorPinOut RIGHT_MOTOR_PIN_OUT;
 extern Motors MOTORS;
@@ -116,8 +141,8 @@ namespace States {
     extern NouvellePocheDansMagasin NOUVELLE_POCHE_DANS_MAGASIN;
 
     extern ParcoursAvecLanceur PARCOURS_AVEC_LANCEUR;
-    extern MonteeAvecLanceur MONTEE_AVEC_LANCER;
-    extern DecenteAvecLanceur DECENTE_AVEC_LANCER;
+    extern MonteeAvecLanceur MONTEE_AVEC_LANCEUR;
+    extern DecenteAvecLanceur DECENTE_AVEC_LANCEUR;
 
     extern VirageEntreeZoneLancement VIRAGE_ENTREE_ZONE_LANCEMENT;
     extern AlignmentReedSwitchZoneLancement ALIGNEMENT_REEDSWITCH_ZONE_LANCEMENT;
@@ -133,8 +158,8 @@ namespace States {
     extern VirageSortieZoneLancement VIRAGE_SORTIE_ZONE_LANCEMENT;
 
     extern ParcoursSansLanceur PARCOURS_SANS_LANCEUR;
-    extern MonteeSansLanceur MONTEE_SANS_LANCER;
-    extern DecenteSansLanceur DECENTE_SANS_LANCER;
+    extern MonteeSansLanceur MONTEE_SANS_LANCEUR;
+    extern DecenteSansLanceur DECENTE_SANS_LANCEUR;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -144,22 +169,16 @@ namespace States {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct OpticalSensor {
-    const uint8_t VCC_PIN, ANALOG_VO_PIN;
-    OpticalSensor(uint8_t VCC_PIN, uint8_t ANALOG_VO_PIN) :
-        VCC_PIN(VCC_PIN), ANALOG_VO_PIN(ANALOG_VO_PIN), _Active(false), _AnalogValue(0.0) {};
+    const uint8_t ANALOG_VO_PIN;
+    OpticalSensor(uint8_t ANALOG_VO_PIN)
+            : ANALOG_VO_PIN(ANALOG_VO_PIN), _Active(false), _AnalogValue(0.0) {};
 
-    void Setup()
-    {
-        pinMode(VCC_PIN, OUTPUT);
-        pinMode(ANALOG_VO_PIN, INPUT);
-
-        digitalWrite(VCC_PIN, HIGH);
-    };
+    void Setup() { pinMode(ANALOG_VO_PIN, INPUT); };
 
     const float & ReadInput()
     {
         _AnalogValue = analogRead(ANALOG_VO_PIN) * (5.0 / 1023.0);
-        _Active = (_AnalogValue > 3.00);
+        _Active = (_AnalogValue > 4.70);
         return _AnalogValue;
     };
 
@@ -262,13 +281,15 @@ struct Motors {
         pinMode(RIGHT_PIN_OUT.DIR_B_PIN, OUTPUT);//Dir2B
 
         digitalWrite(LEFT_PIN_OUT.PWN_PIN, LOW);
-        digitalWrite(LEFT_PIN_OUT.DIR_B_PIN, LOW);
+        digitalWrite(LEFT_PIN_OUT.DIR_A_PIN, LOW);
+        digitalWrite(LEFT_PIN_OUT.DIR_B_PIN, HIGH);
         _LeftPWN = 0;
         _LeftSpeed = 0.0;
         _LeftDirectionRatio = 1.0;
 
         digitalWrite(RIGHT_PIN_OUT.PWN_PIN, LOW);
-        digitalWrite(RIGHT_PIN_OUT.DIR_B_PIN, LOW);
+        digitalWrite(RIGHT_PIN_OUT.DIR_A_PIN, LOW);
+        digitalWrite(RIGHT_PIN_OUT.DIR_B_PIN, HIGH);
         _RightPWM  = 0;
         _RightSpeed = 0.0;
         _RightDirectionRatio = 1.0;
@@ -402,28 +423,29 @@ protected:
 
         if (_LeftDirectionRatio < 0)
         {
-            digitalWrite(LEFT_PIN_OUT.DIR_A_PIN, LOW);
-            digitalWrite(LEFT_PIN_OUT.DIR_B_PIN, HIGH);
+            digitalWrite(LEFT_PIN_OUT.DIR_A_PIN, HIGH);
+            digitalWrite(LEFT_PIN_OUT.DIR_B_PIN, LOW);
         }
         else
         {
-            digitalWrite(LEFT_PIN_OUT.DIR_A_PIN, HIGH);
-            digitalWrite(LEFT_PIN_OUT.DIR_B_PIN, LOW);
+            digitalWrite(LEFT_PIN_OUT.DIR_A_PIN, LOW);
+            digitalWrite(LEFT_PIN_OUT.DIR_B_PIN, HIGH);
         }
 
         if (_RightDirectionRatio < 0)
         {
-            digitalWrite(RIGHT_PIN_OUT.DIR_A_PIN, LOW);
-            digitalWrite(RIGHT_PIN_OUT.DIR_B_PIN, HIGH);
-        }
-        else
-        {
             digitalWrite(RIGHT_PIN_OUT.DIR_A_PIN, HIGH);
             digitalWrite(RIGHT_PIN_OUT.DIR_B_PIN, LOW);
         }
+        else
+        {
+            digitalWrite(RIGHT_PIN_OUT.DIR_A_PIN, LOW);
+            digitalWrite(RIGHT_PIN_OUT.DIR_B_PIN, HIGH);
+        }
 
         _LeftPWN = map(_LeftSpeed * 1599 * _RightDirectionRatio, 0, 1599, 0, 1599);
-        _RightPWM = map(_RightSpeed  * 1599 * _RightDirectionRatio, 0, 1599, 0, 1599);
+        _RightPWM = map(_RightSpeed  * 1599 * _RightDirectionRatio * RIGHT_MOTOR_RATIO,
+                0, 1599, 0, 1599);
     };
 
 private:
@@ -441,29 +463,9 @@ private:
 
 namespace States {
 
-    struct DecenteSansLanceur {
-        static const unsigned short STATE_ID = 17;
+    struct ChargementBatterie {
 
-        DecenteSansLanceur() {};
-
-        void Update() {
-
-        };
-
-        void Execute() {
-
-        };
-
-        const bool & IsActive() { return active; };
-
-    private:
-        bool active;
-    };
-
-    struct MonteeSansLanceur {
-        static const unsigned short STATE_ID = 16;
-
-        MonteeSansLanceur() {};
+        ChargementBatterie() {};
 
         void Update() {
 
@@ -479,10 +481,9 @@ namespace States {
         bool active;
     };
 
-    struct ParcoursSansLanceur {
-        static const unsigned short STATE_ID = 15;
+    struct NouvellePocheDansMagasin {
 
-        ParcoursSansLanceur() {};
+        NouvellePocheDansMagasin() {};
 
         void Update() {
 
@@ -500,262 +501,8 @@ namespace States {
 }
 
 namespace States {
-
-    struct VirageSortieZoneLancement {
-        static const unsigned short STATE_ID = 14;
-
-        VirageSortieZoneLancement() {};
-
-        void Update() {
-
-        };
-
-        void Execute() {
-
-        };
-
-        const bool & IsActive() { return active; };
-
-    private:
-        bool active;
-    };
-
-    struct SeparationLanceur {
-        static const unsigned short STATE_ID = 13;
-
-        SeparationLanceur() {};
-
-        void Update() {
-
-        };
-
-        void Execute() {
-
-        };
-
-        const bool & IsActive() { return active; };
-
-    private:
-        bool active;
-    };
-}
-
-namespace States {
-
-    struct SequenceLancementPoches {
-        static const unsigned short STATE_ID = 12;
-
-        SequenceLancementPoches() {};
-
-        void Update() {
-
-        };
-
-        void Execute() {
-
-        };
-
-        const bool & IsActive() { return active; };
-
-    private:
-        bool active;
-    };
-
-    struct SequenceCalculRotationCible {
-        static const unsigned short STATE_ID = 11;
-
-        SequenceCalculRotationCible() {};
-
-        void Update() {
-
-        };
-
-        void Execute() {
-
-        };
-
-        const bool & IsActive() { return active; };
-
-    private:
-        bool active;
-    };
-}
-
-namespace States {
-
-    struct VerificationDeclenchementLimitSwitchs {
-        static const unsigned short STATE_ID = 10;
-
-        VerificationDeclenchementLimitSwitchs() {};
-
-        void Update() {
-
-        };
-
-        void Execute() {
-
-        };
-
-        const bool & IsActive() { return active; };
-
-    private:
-        bool active;
-    };
-
-    struct DeploiementLimitSwitchs {
-        static const unsigned short STATE_ID = 9;
-
-        DeploiementLimitSwitchs() {};
-
-        void Update() {
-
-        };
-
-        void Execute() {
-
-        };
-
-        const bool & IsActive() { return active; };
-
-    private:
-        bool active;
-    };
-}
-
-namespace States {
-
-    struct DeploiementCanon {
-        static const unsigned short STATE_ID = 8;
-
-        DeploiementCanon() {};
-
-        void Update() {
-
-        };
-
-        void Execute() {
-
-        };
-
-        const bool & IsActive() { return active; };
-
-    private:
-        bool active;
-    };
-
-    struct AlignmentReedSwitchZoneLancement {
-        static const unsigned short STATE_ID = 7;
-
-        AlignmentReedSwitchZoneLancement() {};
-
-        void Update() {
-
-        };
-
-        void Execute() {
-
-        };
-
-        const bool & IsActive() { return active; };
-
-    private:
-        bool active;
-    };
-
-    struct VirageEntreeZoneLancement {
-        static const unsigned short STATE_ID = 6;
-
-        VirageEntreeZoneLancement() : active(false) {};
-
-        void Update()
-        {
-            active = true;
-        };
-
-        void Execute()
-        {
-            MOTORS.Speed(MOTOR_LEFT, 0.00);
-            MOTORS.Speed(MOTOR_RIGHT, 0.00);
-        };
-
-        const bool & IsActive() { return active; };
-
-    private:
-        bool active;
-    };
-}
-
-namespace States {
-
-    struct DecenteAvecLanceur {
-        static const unsigned short STATE_ID = 5;
-
-        DecenteAvecLanceur() : active(false) {};
-
-        void Update()
-        {
-            OPTICAL_SENSOR.ReadInput();
-            if (!OPTICAL_SENSOR.IsActive())
-            {
-                CURRENT_STATES_ID = VirageEntreeZoneLancement::STATE_ID;
-                active = false;
-            }
-            else
-            {
-                active = true;
-            }
-        };
-
-        void Execute()
-        {
-            MOTORS.Speed(MOTOR_LEFT, 0.50);
-            MOTORS.Speed(MOTOR_RIGHT, 0.50);
-        };
-
-        const bool & IsActive() { return active; };
-
-    private:
-        bool active;
-    };
-
-    struct MonteeAvecLanceur {
-        static const unsigned short STATE_ID = 4;
-
-        MonteeAvecLanceur() : active(false), sommetDosDane(false) {};
-
-        void Update() {
-
-            OPTICAL_SENSOR.ReadInput();
-            if (!OPTICAL_SENSOR.IsActive())
-            {
-                sommetDosDane = true;
-            }
-            else if (OPTICAL_SENSOR.IsActive() && sommetDosDane)
-            {
-                CURRENT_STATES_ID = DecenteAvecLanceur::STATE_ID;
-                active = false;
-            }
-            else
-            {
-                active = true;
-            }
-        };
-
-        void Execute() {
-
-            MOTORS.Speed(MOTOR_LEFT, 0.50);
-            MOTORS.Speed(MOTOR_RIGHT, 0.50);
-        };
-
-        const bool & IsActive() { return active; };
-
-    private:
-        bool active;
-        bool sommetDosDane;
-    };
 
     struct ParcoursAvecLanceur {
-        static const unsigned short STATE_ID = 3;
 
         ParcoursAvecLanceur() : active(false), firstpass(true) {};
 
@@ -770,7 +517,16 @@ namespace States {
             OPTICAL_SENSOR.ReadInput();
             if (OPTICAL_SENSOR.IsActive() && time + 3000 < millis())
             {
-                CURRENT_STATES_ID = MonteeAvecLanceur::STATE_ID;
+
+                MOTORS.Speed(MOTOR_LEFT, 0.00);
+                MOTORS.Speed(MOTOR_RIGHT, 0.00);
+
+                delay(1000);
+
+                MOTORS.Speed(MOTOR_LEFT, 0.50);
+                MOTORS.Speed(MOTOR_RIGHT, 0.50);
+
+                CURRENT_STATES_ID = MONTEE_AVEC_LANCEUR_STATE_ID;
 
                 active = false;
             }
@@ -794,17 +550,116 @@ namespace States {
         unsigned long time;
     };
 
+    struct MonteeAvecLanceur {
 
+        MonteeAvecLanceur() : active(false), sommetDosDane(false) {};
 
+        void Update() {
 
+            OPTICAL_SENSOR.ReadInput();
+            if (!OPTICAL_SENSOR.IsActive())
+            {
+                sommetDosDane = true;
+            }
+            else if (OPTICAL_SENSOR.IsActive() && sommetDosDane)
+            {
+
+                MOTORS.Speed(MOTOR_LEFT, 0.00);
+                MOTORS.Speed(MOTOR_RIGHT, 0.00);
+
+                delay(1000);
+
+                MOTORS.Speed(MOTOR_LEFT, 0.50);
+                MOTORS.Speed(MOTOR_RIGHT, 0.50);
+
+                CURRENT_STATES_ID = DECENTE_AVEC_LANCEUR_STATE_ID;
+                active = false;
+            }
+            else
+            {
+                active = true;
+            }
+        };
+
+        void Execute() {
+
+            MOTORS.Speed(MOTOR_LEFT, 0.50);
+            MOTORS.Speed(MOTOR_RIGHT, 0.50);
+        };
+
+        const bool & IsActive() { return active; };
+
+    private:
+        bool active;
+        bool sommetDosDane;
+    };
+
+    struct DecenteAvecLanceur {
+
+        DecenteAvecLanceur() : active(false) {};
+
+        void Update()
+        {
+            OPTICAL_SENSOR.ReadInput();
+            if (!OPTICAL_SENSOR.IsActive())
+            {
+
+                MOTORS.Speed(MOTOR_LEFT, 0.00);
+                MOTORS.Speed(MOTOR_RIGHT, 0.00);
+
+                delay(1000);
+
+                MOTORS.Speed(MOTOR_LEFT, 0.50);
+                MOTORS.Speed(MOTOR_RIGHT, 0.50);
+
+                CURRENT_STATES_ID = PARCOURS_AVEC_LANCEUR_STATE_ID;
+                active = false;
+            }
+            else
+            {
+                active = true;
+            }
+        };
+
+        void Execute()
+        {
+            MOTORS.Speed(MOTOR_LEFT, 0.50);
+            MOTORS.Speed(MOTOR_RIGHT, 0.50);
+        };
+
+        const bool & IsActive() { return active; };
+
+    private:
+        bool active;
+    };
 }
 
 namespace States {
 
-    struct NouvellePocheDansMagasin {
-        static const unsigned short STATE_ID = 2;
+    struct VirageEntreeZoneLancement {
 
-        NouvellePocheDansMagasin() {};
+        VirageEntreeZoneLancement() : active(false) {};
+
+        void Update()
+        {
+            active = true;
+        };
+
+        void Execute()
+        {
+            MOTORS.Speed(MOTOR_LEFT, 0.00);
+            MOTORS.Speed(MOTOR_RIGHT, 0.00);
+        };
+
+        const bool & IsActive() { return active; };
+
+    private:
+        bool active;
+    };
+
+    struct AlignmentReedSwitchZoneLancement {
+
+        AlignmentReedSwitchZoneLancement() {};
 
         void Update() {
 
@@ -820,10 +675,9 @@ namespace States {
         bool active;
     };
 
-    struct ChargementBatterie {
-        static const unsigned short STATE_ID = 1;
+    struct DeploiementCanon {
 
-        ChargementBatterie() {};
+        DeploiementCanon() {};
 
         void Update() {
 
@@ -840,17 +694,179 @@ namespace States {
     };
 }
 
+namespace States {
 
+    struct DeploiementLimitSwitchs {
 
+        DeploiementLimitSwitchs() {};
 
+        void Update() {
 
+        };
 
+        void Execute() {
 
+        };
 
+        const bool & IsActive() { return active; };
 
+    private:
+        bool active;
+    };
 
+    struct VerificationDeclenchementLimitSwitchs {
 
+        VerificationDeclenchementLimitSwitchs() {};
 
+        void Update() {
+
+        };
+
+        void Execute() {
+
+        };
+
+        const bool & IsActive() { return active; };
+
+    private:
+        bool active;
+    };
+}
+
+namespace States {
+
+    struct SequenceCalculRotationCible {
+
+        SequenceCalculRotationCible() {};
+
+        void Update() {
+
+        };
+
+        void Execute() {
+
+        };
+
+        const bool & IsActive() { return active; };
+
+    private:
+        bool active;
+    };
+
+    struct SequenceLancementPoches {
+
+        SequenceLancementPoches() {};
+
+        void Update() {
+
+        };
+
+        void Execute() {
+
+        };
+
+        const bool & IsActive() { return active; };
+
+    private:
+        bool active;
+    };
+}
+
+namespace States {
+
+    struct SeparationLanceur {
+
+        SeparationLanceur() {};
+
+        void Update() {
+
+        };
+
+        void Execute() {
+
+        };
+
+        const bool & IsActive() { return active; };
+
+    private:
+        bool active;
+    };
+
+    struct VirageSortieZoneLancement {
+
+        VirageSortieZoneLancement() {};
+
+        void Update() {
+
+        };
+
+        void Execute() {
+
+        };
+
+        const bool & IsActive() { return active; };
+
+    private:
+        bool active;
+    };
+}
+
+namespace States {
+
+    struct ParcoursSansLanceur {
+
+        ParcoursSansLanceur() {};
+
+        void Update() {
+
+        };
+
+        void Execute() {
+
+        };
+
+        const bool & IsActive() { return active; };
+
+    private:
+        bool active;
+    };
+
+    struct MonteeSansLanceur {
+
+        MonteeSansLanceur() {};
+
+        void Update() {
+
+        };
+
+        void Execute() {
+
+        };
+
+        const bool & IsActive() { return active; };
+
+    private:
+        bool active;
+    };
+
+    struct DecenteSansLanceur {
+
+        DecenteSansLanceur() {};
+
+        void Update() {
+
+        };
+
+        void Execute() {
+
+        };
+
+        const bool & IsActive() { return active; };
+
+    private:
+        bool active;
+    };
+}
 
 
 #endif INB4_H
@@ -860,14 +876,15 @@ long int RIGHT_MOTOR_PWMVAL = 0;
 
 XBeeComm XBEECOMM               = XBeeComm(10, 9, 57600);
 LimitSwitch LIMIT_SWITCH        = LimitSwitch(46);
-OpticalSensor OPTICAL_SENSOR    = OpticalSensor(48, A12);
+OpticalSensor OPTICAL_SENSOR    = OpticalSensor(A12);
 
-
-MotorPinOut LEFT_MOTOR_PIN_OUT   = MotorPinOut(5, 4, 12, A1);
-MotorPinOut RIGHT_MOTOR_PIN_OUT  = MotorPinOut(7, 6, 11, A0);
+float RIGHT_MOTOR_RATIO = 0.65;
+MotorPinOut LEFT_MOTOR_PIN_OUT   = MotorPinOut(A0, A1, 11, A2);
+MotorPinOut RIGHT_MOTOR_PIN_OUT  = MotorPinOut(A5, A4, 12, A3);
 Motors MOTORS                    = Motors(RIGHT_MOTOR_PIN_OUT, LEFT_MOTOR_PIN_OUT);
 
-unsigned short CURRENT_STATES_ID = States::PARCOURS_AVEC_LANCEUR.STATE_ID;
+
+unsigned short CURRENT_STATES_ID = 0; //States::PARCOURS_AVEC_LANCEUR_STATE_ID;
 
 namespace States {
 
@@ -892,9 +909,8 @@ namespace States {
     VirageSortieZoneLancement VIRAGE_SORTIE_ZONE_LANCEMENT = VirageSortieZoneLancement();
 
     ParcoursSansLanceur PARCOURS_SANS_LANCEUR = ParcoursSansLanceur();
-    MonteeSansLanceur MONTEE_SANS_LANCER = MonteeSansLanceur();
-    DecenteSansLanceur DECENTE_SANS_LANCER = DecenteSansLanceur();
-
+    MonteeSansLanceur MONTEE_SANS_LANCEUR = MonteeSansLanceur();
+    DecenteSansLanceur DECENTE_SANS_LANCEUR = DecenteSansLanceur();
 };
 
 void INB4::setup() {
@@ -905,8 +921,6 @@ void INB4::setup() {
 
     MOTORS.Setup();
     OPTICAL_SENSOR.Setup();
-
-    //LIMIT_SWITCH.Setup();
 }
 
 void INB4::loop() {
@@ -1003,6 +1017,14 @@ void INB4::loop() {
     ///                                                                     ///
     ///////////////////////////////////////////////////////////////////////////
 
+    //MOTORS.Speed(MOTOR_RIGHT, 1.0);
+    //MOTORS.Speed(MOTOR_LEFT, 1.0);
+
+    //LEFT_MOTOR_PWMVAL = map(0.7 * 1599, 0, 1599, 0, 1599);
+    //RIGHT_MOTOR_PWMVAL = map(0.7 * 0.65 * 1599, 0, 1599, 0, 1599);
+
+
+    //CURRENT_STATES_ID = 0;
 
     OPTICAL_SENSOR.ReadInput();
     if (OPTICAL_SENSOR.IsActive())
@@ -1018,7 +1040,12 @@ void INB4::loop() {
     //Serial.print(OPTICAL_SENSOR.ReadInput()); Serial.println("v");
 
 
-    delay(30);
+    MOTORS.Speed(MOTOR_RIGHT, 0.60);
+    MOTORS.Speed(MOTOR_LEFT, 0.60);
+
+
+
+    //delay(30);
 
 
     ///////////////////////////////////////////////////////////////////////////
@@ -1028,7 +1055,7 @@ void INB4::loop() {
 
     switch (CURRENT_STATES_ID){
 
-        case States::ChargementBatterie::STATE_ID :
+        case States::CHARGEMENT_BATTERIE_STATE_ID :
         {
             States::CHARGEMENT_BATTERIE.Update();
             if (States::CHARGEMENT_BATTERIE.IsActive())
@@ -1039,7 +1066,7 @@ void INB4::loop() {
             break;
         }
 
-        case States::NouvellePocheDansMagasin::STATE_ID :
+        case States::NOUVELLE_POCHE_DANS_MAGASIN_STATE_ID :
         {
             States::NOUVELLE_POCHE_DANS_MAGASIN.Update();
             if (States::NOUVELLE_POCHE_DANS_MAGASIN.IsActive())
@@ -1051,7 +1078,7 @@ void INB4::loop() {
         }
 
 
-        case States::ParcoursAvecLanceur::STATE_ID :
+        case States::PARCOURS_AVEC_LANCEUR_STATE_ID:
         {
             States::PARCOURS_AVEC_LANCEUR.Update();
             if (States::PARCOURS_AVEC_LANCEUR.IsActive())
@@ -1062,7 +1089,7 @@ void INB4::loop() {
             break;
         };
 
-        case States::MonteeAvecLanceur::STATE_ID :
+        case States::MONTEE_AVEC_LANCEUR_STATE_ID :
         {
             States::MONTEE_AVEC_LANCER.Update();
             if (States::MONTEE_AVEC_LANCER.IsActive())
@@ -1073,7 +1100,7 @@ void INB4::loop() {
             break;
         };
 
-        case States::DecenteAvecLanceur::STATE_ID :
+        case States::DECENTE_AVEC_LANCEUR_STATE_ID :
         {
             States::DECENTE_AVEC_LANCER.Update();
             if (States::DECENTE_AVEC_LANCER.IsActive())
@@ -1085,7 +1112,7 @@ void INB4::loop() {
         };
 
 
-        case States::VirageEntreeZoneLancement::STATE_ID :
+        case States::VIRAGE_ENTREE_ZONE_LANCEMENT_STATE_ID :
         {
             States::VIRAGE_ENTREE_ZONE_LANCEMENT.Update();
             if (States::VIRAGE_ENTREE_ZONE_LANCEMENT.IsActive())
@@ -1096,7 +1123,7 @@ void INB4::loop() {
             break;
         };
 
-        case States::AlignmentReedSwitchZoneLancement::STATE_ID :
+        case States::ALIGNEMENT_REEDSWITCH_ZONE_LANCEMENT_STATE_ID :
         {
             States::ALIGNEMENT_REEDSWITCH_ZONE_LANCEMENT.Update();
             if (States::ALIGNEMENT_REEDSWITCH_ZONE_LANCEMENT.IsActive())
@@ -1107,7 +1134,7 @@ void INB4::loop() {
             break;
         };
 
-        case States::DeploiementCanon::STATE_ID :
+        case States::DEPLOIEMENT_CANON_STATE_ID :
         {
             States::DEPLOIEMENT_CANON.Update();
             if (States::DEPLOIEMENT_CANON.IsActive())
@@ -1118,7 +1145,7 @@ void INB4::loop() {
             break;
         };
 
-        case States::DeploiementLimitSwitchs::STATE_ID :
+        case States::DEPLOIEMENT_LIMITSWITCHS_STATE_ID :
         {
             States::DEPLOIEMENT_LIMITSWITCHS.Update();
             if (States::DEPLOIEMENT_LIMITSWITCHS.IsActive())
@@ -1129,7 +1156,7 @@ void INB4::loop() {
             break;
         };
 
-        case States::VerificationDeclenchementLimitSwitchs::STATE_ID :
+        case States::VERIFICATION_DECLENCHEMENT_LIMITSWITCHS_STATE_ID :
         {
             States::VERIFICATION_DECLENCHEMENT_LIMITSWITCHS.Update();
             if (States::VERIFICATION_DECLENCHEMENT_LIMITSWITCHS.IsActive())
@@ -1140,7 +1167,7 @@ void INB4::loop() {
             break;
         };
 
-        case States::SequenceCalculRotationCible::STATE_ID :
+        case States::SEQUENCE_CALCUL_ROTATION_CIBLE_STATE_ID :
         {
             States::SEQUENCE_CALCUL_ROTATION_CIBLE.Update();
             if (States::SEQUENCE_CALCUL_ROTATION_CIBLE.IsActive())
@@ -1151,7 +1178,7 @@ void INB4::loop() {
             break;
         };
 
-        case States::SequenceLancementPoches::STATE_ID :
+        case States::SEQUENCE_LANCEMENT_POCHES_STATE_ID:
         {
             States::SEQUENCE_LANCEMENT_POCHES.Update();
             if (States::SEQUENCE_LANCEMENT_POCHES.IsActive())
@@ -1163,7 +1190,7 @@ void INB4::loop() {
         };
 
 
-        case States::SeparationLanceur::STATE_ID :
+        case States::SEPARATION_LANCEUR_STATE_ID :
         {
             States::SEPARATION_LANCEUR.Update();
             if (States::SEPARATION_LANCEUR.IsActive())
@@ -1174,7 +1201,7 @@ void INB4::loop() {
             break;
         };
 
-        case States::VirageSortieZoneLancement::STATE_ID :
+        case States::VIRAGE_SORTIE_ZONE_LANCEMENT_STATE_ID :
         {
             States::VIRAGE_SORTIE_ZONE_LANCEMENT.Update();
             if (States::VIRAGE_SORTIE_ZONE_LANCEMENT.IsActive())
@@ -1186,7 +1213,7 @@ void INB4::loop() {
         };
 
 
-        case States::ParcoursSansLanceur::STATE_ID :
+        case States::PARCOURS_SANS_LANCEUR_STATE_ID :
         {
             States::PARCOURS_SANS_LANCEUR.Update();
             if (States::PARCOURS_SANS_LANCEUR.IsActive())
@@ -1197,23 +1224,23 @@ void INB4::loop() {
             break;
         };
 
-        case States::MonteeSansLanceur::STATE_ID :
+        case States::MONTEE_SANS_LANCEUR_STATE_ID :
         {
-            States::MONTEE_SANS_LANCER.Update();
-            if (States::MONTEE_SANS_LANCER.IsActive())
+            States::MONTEE_SANS_LANCEUR.Update();
+            if (States::MONTEE_SANS_LANCEUR.IsActive())
             {
-                States::MONTEE_SANS_LANCER.Execute();
+                States::MONTEE_SANS_LANCEUR.Execute();
             }
 
             break;
         };
 
-        case States::DecenteSansLanceur::STATE_ID :
+        case States::DECENTE_SANS_LANCEUR_STATE_ID :
         {
-            States::DECENTE_SANS_LANCER.Update();
-            if (States::DECENTE_SANS_LANCER.IsActive())
+            States::DECENTE_SANS_LANCEUR.Update();
+            if (States::DECENTE_SANS_LANCEUR.IsActive())
             {
-                States::DECENTE_SANS_LANCER.Execute();
+                States::DECENTE_SANS_LANCEUR.Execute();
             }
 
             break;
