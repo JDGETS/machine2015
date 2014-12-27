@@ -21,9 +21,10 @@ struct OpticalSensor {
     const bool IsActive() const;
     const bool IsActiveWithoutBounce();
     const bool IsActiveWithBounce();
+    const bool LongReadInput(bool ifUnsure);
 
 private:
-	static const float OPTICAL_SENSOR_MIN_ACTIVE_VALUE   = 4.85;
+	static const float MIN_ACTIVE_VALUE = 4.80;
     static const unsigned long BOUNCING_VALUE = 30;
     float _AnalogValue;
     bool _Active;

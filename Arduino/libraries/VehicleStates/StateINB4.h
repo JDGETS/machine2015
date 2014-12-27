@@ -165,10 +165,11 @@ namespace States {
                 firstpass = false;
             }
 
-            if (OPTICAL_SENSOR.IsActiveWithBounce())
+            if (OPTICAL_SENSOR.LongReadInput(false))
             {
                 CURRENT_STATES_ID = MONTEE_AVEC_LANCEUR_STATE_ID;
                 active = false;
+                delay(20);
             }
             else
             {
@@ -201,15 +202,15 @@ namespace States {
              */
 
 
-            if (!OPTICAL_SENSOR.IsActiveWithBounce()
-                    && _FirstExecuteTime + 2000 > millis())
+            if (!OPTICAL_SENSOR.LongReadInput(true))
             {
                 sommetDosDane = true;
             }
-            else if (OPTICAL_SENSOR.IsActiveWithoutBounce() && sommetDosDane)
+            else if (OPTICAL_SENSOR.LongReadInput(false) && sommetDosDane)
             {
                 CURRENT_STATES_ID = DECENTE_AVEC_LANCEUR_STATE_ID;
                 active = false;
+                delay(20);
             }
             else
             {
@@ -218,12 +219,6 @@ namespace States {
         };
 
         void Execute() {
-
-            if (_FirstExecuteTime == 0)
-            {
-                _FirstExecuteTime = millis();
-            }
-
             MOTORS.Speed(MOTOR_LEFT, 0.35);
             MOTORS.Speed(MOTOR_RIGHT, 0.35);
         };
@@ -242,11 +237,11 @@ namespace States {
 
         void Update()
         {
-            if (!OPTICAL_SENSOR.IsActiveWithBounce()
-                    || _FirstExecuteTime + 1500 > millis())
+            if (!OPTICAL_SENSOR.LongReadInput(true))
             {
                 CURRENT_STATES_ID = VIRAGE_ENTREE_ZONE_LANCEMENT_STATE_ID;
                 active = false;
+                delay(20);
             }
             else
             {
@@ -256,11 +251,6 @@ namespace States {
 
         void Execute()
         {
-            if (_FirstExecuteTime == 0)
-            {
-                _FirstExecuteTime = millis();
-            }
-
             MOTORS.Speed(MOTOR_LEFT, -0.34);
             MOTORS.Speed(MOTOR_RIGHT, -0.34);
         };
@@ -484,27 +474,69 @@ namespace States {
 
 
             static const unsigned long startTime        = millis();
-            static const unsigned int nbStep            = 10;
+            static const unsigned int nbStep            = 7;
             static const float leftSpeeds[nbStep]       = {
-                    0.0, -0.14, 0.22, -0.45, -0.80, 0.0,
-                    -0.60, 0.0, 0.35,
-
+                    0.0, 0.0,
+                    -0.13, 0.0,
+                    0.0, 0.0,
                     0.0
             };
 
             static const float rightSpeeds[nbStep]      = {
-                    0.0, -0.14, 0.22, 0.55, 0.20, 0.70,
-                    0.0, 0.50, 0.35,
-
+                    0.0, 0.0,
+                    -0.13, 0.0,
+                    0.35, 0.0,
                     0.0
             };
 
             static const unsigned long timing[nbStep]   = {
-                    500, 1500, 1650, 1900, 2000, 2100,
-                    2300, 2450, 2950,
-
-                    2952
+                    500, 1500,
+                    2500, 3500,
+                    5500, 6500,
+                    6501
             };
+        /*
+            static const unsigned long startTime        = millis();
+            static const unsigned int nbStep            = 19;
+            static const float leftSpeeds[nbStep]       = {
+                    0.0,    0.0,
+                    -0.14,  0.0,
+                    0.22,   0.0,
+                    -0.45,  0.0,
+                    -0.80,  0.0,
+                    0.0,    0.0,
+                    -0.60,  0.0,
+                    0.0,    0.0,
+                    0.35,   0.0,
+                    0.0
+             };                  };
+         
+            static const float rightSpeeds[nbStep]      = {
+                    0.0,    0.0,
+                    -0.14,  0.0,
+                    0.22,   0.0,
+                    0.55,   0.0,
+                    0.20,   0.0,
+                    0.70,   0.0,
+                    0.0,    0.0,
+                    0.50,   0.0,
+                    0.35,   0.0,
+                    0.0
+            };
+
+            static const unsigned long timing[nbStep]   = {
+                    500,    1500,
+                    2500,   3500,
+                    3650,   4650,
+                    4900,   5900,
+                    6000,   7000,
+                    7100,   8100,
+                    8300,   9300,
+                    9450,   10450,
+                    10950,  11950,
+                    11952
+            };
+        */
 
             MOTORS.RunSpeedScript(nbStep, leftSpeeds, rightSpeeds, timing, startTime);
 
