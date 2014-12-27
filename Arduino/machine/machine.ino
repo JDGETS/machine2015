@@ -2,23 +2,27 @@
 
 #include <Arduino.h>
 
+#include <SoftwareSerial.h>
+
+
 #define SKETCH
 
 
 
-//#ifndef SKETCH
-//#error sketch is not defined in Arduino IDE
-//#else
-#include <inb4.h>
-//#endif 
+/// grep -r "string to search" .
+#include <INB4.h>
+//#include <inb4.h>
 
-
-
+ISR(TIMER1_OVF_vect)
+{
+    OCR1A =  LEFT_MOTOR_PWMVAL ;
+    OCR1B =  RIGHT_MOTOR_PWMVAL ;
+}
 
 void setup(){ 
-  inb4::setup(); 
+  INB4::setup(); 
 }
 void loop(){ 
-  inb4::loop(); 
+  INB4::loop(); 
 }
 
