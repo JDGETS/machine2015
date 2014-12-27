@@ -31,6 +31,8 @@ namespace Vehicle{
         void ServoUnloadBag();
         void ServoMoveBag(); // For testing purposes only.
     };
+
+    extern Store store;
 }
 
 #endif

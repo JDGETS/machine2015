@@ -8,7 +8,7 @@ using namespace Vehicle;
 
 Store::Store(){
   servoPosition = STORE_SERVO_INITIAL_MICROS; //Set initial servo position behind the real desired position (get rid of deadzone)
-  bagsCount = 1;
+  bagsCount = 0;
 }
 
 void Store::Setup(){

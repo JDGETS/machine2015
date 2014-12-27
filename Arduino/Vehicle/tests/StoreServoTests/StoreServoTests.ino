@@ -4,7 +4,9 @@
 #include "Store.h"
 using namespace Vehicle;
 
-Store store;
+namespace Vehicle{
+  Vehicle::Store store;
+} 
 
 // Calibration tools
 String readString;
