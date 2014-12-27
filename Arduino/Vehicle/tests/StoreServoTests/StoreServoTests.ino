@@ -1,12 +1,9 @@
 //Must include "Shooter/Store.ino"
 //Used to calibrate the values for STORE_SERVO_ROTATION_STEP and the different formulas for the bags' store.
 #include <Servo.h>
-#include "Store.h"
-using namespace Vehicle;
-
-namespace Vehicle{
-  Vehicle::Store store;
-} 
+#include "Hardware.h"
+#include "Vehicle.h"
+#include "AllStates.h"
 
 // Calibration tools
 String readString;

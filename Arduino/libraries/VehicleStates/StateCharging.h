@@ -14,7 +14,7 @@ namespace Vehicle{
       {
         store.Initialize();
 
-        while(Vehicle::store.bagsCount < 8){
+        while(!Vehicle::store.IsFull()){
           storeBagInSwitch.WaitForPress();
           storeBagInSwitch.WaitForRelease();
           delay(CHARGING_SWITCH_TO_STORE_DELAY);
