@@ -1,5 +1,5 @@
-#define USE_STORE_SERVO
 #include <Servo.h>
+#include "LimitSwitch.h"
 #include "Store.h"
 
 #define SHOOTER_SWITCH_PIN 38
@@ -8,40 +8,24 @@
 #define STORE_SWITCH_PIN 44
 #define SHOOTER_MOTOR_MOSFET 7
 
-struct LimitSwitch {
-    const uint8_t PIN;
-    LimitSwitch(uint8_t PIN) : PIN(PIN), active(false), lastStatusChange(0) {};
-    void Setup() { pinMode(PIN, INPUT_PULLUP); lastStatusChange = millis();};
-    const bool IsActive() const { return active; };
-    const bool ReadInput()
-    {
-        active = (digitalRead(PIN) == 0);
-        return IsActive();
-    };
-    
-    unsigned long lastStatusChange;
-    const static int DEBOUNCE_TIME = 100;
-    
-    void ResetDebouncing(){
-      ReadInput(); //Reset value reading
-      lastStatusChange = 0;
-    }
-    
-    void WaitForPress(){
-      while(millis() < lastStatusChange + DEBOUNCE_TIME); //Debounce
-      while(digitalRead(PIN) != 0);
-      lastStatusChange = millis();
-    }
-    
-    void WaitForRelease(){
-      while(millis() < lastStatusChange + DEBOUNCE_TIME); //Debounce
-      while(digitalRead(PIN) == 0);
-      lastStatusChange = millis();
-    }
+namespace States {
+    struct Charging {
+        Charging() : active(false) {};
 
-private:
-    bool active;
-};
+        void Update() {
+           //Called before execute.
+        };
+
+        void Execute() {
+          //Do shit
+        };
+
+        const bool & IsActive() { return active; };
+
+    private:
+        bool active;
+    };
+}
 
 unsigned long nextHoleTime = -1;
 unsigned long delta = -1;
@@ -139,24 +123,9 @@ void loop()
 //Responsable for dropping the next bag. Include the delay in there. Only return when the bag is in the shooter ready to get shot.
 void DropNextBag(){
   Serial.println("Dropped bag.");
-  //States::store.ServoMoveBag();
-  //return;
-  
-#ifdef USE_STORE_SERVO
-    States::store.ServoUnloadBag();
-#else //With Moteur
-  unsigned long MOTOR_STEP_TIME = 20;
-  while(digitalRead(STORE_SWITCH_PIN) != 0){
-    //moteurOn
-    delay(MOTOR_STEP_TIME);
-    //moteurOff
-  }
-  while(digitalRead(STORE_SWITCH_PIN) != 0){
-    //moteurOn
-    delay(MOTOR_STEP_TIME);
-    //moteurOff
-  }
-#endif
+
+  States::store.ServoUnloadBag();
+
   delay(BAG_FREE_FALL_DELAY); //Wait for the bag to fall into place.
 }
 

@@ -1,4 +1,5 @@
 #include <Servo.h>
+#include "LimitSwitch.h"
 
 //////// Pins //////// 
 #define ELEVATOR_SWITCH_PIN     46
@@ -15,36 +16,6 @@
 #define DOOR_RUN       1400
 #define CONVEYOR_RUN   1400
 #define CONVEYOR_STOP  1500
-
-struct LimitSwitch {
-    const uint8_t PIN;
-    LimitSwitch(uint8_t PIN) : PIN(PIN), active(false), lastStatusChange(0) {};
-    void Setup() { pinMode(PIN, INPUT_PULLUP); };
-    const bool IsActive() const { return active; };
-    const bool ReadInput()
-    {
-        active = (digitalRead(PIN) == 0);
-        return IsActive();
-    };
-    
-    unsigned long lastStatusChange;
-    const static int DEBOUNCE_TIME = 100;
-    
-    void WaitForPress(){
-      while(millis() < lastStatusChange + DEBOUNCE_TIME); //Debounce
-      while(digitalRead(PIN) == 0);
-      lastStatusChange = millis();
-    }
-    
-    void WaitForRelease(){
-      while(millis() < lastStatusChange + DEBOUNCE_TIME); //Debounce
-      while(digitalRead(PIN) != 0);
-      lastStatusChange = millis();
-    }
-
-private:
-    bool active;
-};
 
 //////// Variables //////// 
 LimitSwitch elevatorSwitch(ELEVATOR_SWITCH_PIN);
