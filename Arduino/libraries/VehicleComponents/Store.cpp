@@ -4,10 +4,7 @@
  */
 #include <Servo.h>
 #include "Store.h"
-
-namespace States {
-  Store store;
-}
+using namespace Vehicle;
 
 Store::Store(){
   servoPosition = STORE_SERVO_INITIAL_MICROS; //Set initial servo position behind the real desired position (get rid of deadzone)

@@ -13,16 +13,21 @@ struct OpticalSensor {
     OpticalSensor(uint8_t ANALOG_VO_PIN)
             : ANALOG_VO_PIN(ANALOG_VO_PIN), _Active(false), _AnalogValue(0.0) {};
 
-    void Setup();;
+    void Setup();
 
-    const float & ReadInput();
-
+    const float & ReadInputWithoutBounce();
+    const float & ReadInputWithBounce();
     const float & AnalogValue();
     const bool IsActive() const;
+    const bool IsActiveWithoutBounce();
+    const bool IsActiveWithBounce();
 
 private:
+	static const float OPTICAL_SENSOR_MIN_ACTIVE_VALUE   = 4.85;
+    static const unsigned long BOUNCING_VALUE = 30;
     float _AnalogValue;
     bool _Active;
+    unsigned long _lastRead;
 };
 
 #endif
