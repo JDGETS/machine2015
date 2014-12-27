@@ -10,18 +10,20 @@ namespace States {
 }
 
 Store::Store(){
-  servoPosition = STORE_SERVO_INITIAL_MICROS;
+  servoPosition = STORE_SERVO_INITIAL_MICROS; //Set initial servo position behind the real desired position (get rid of deadzone)
   bagsCount = 1;
 }
 
 void Store::Setup(){
-  servo.writeMicroseconds(STORE_SERVO_INITIAL_MICROS); //Set initial servo position behind the real desired position (get rid of deadzone)
+  servo.writeMicroseconds(servoPosition);
   servo.attach(STORE_SERVO_PIN, STORE_SERVO_MIN_MICROS, STORE_SERVO_MAX_MICROS);
   setupTime = millis(); 
 };
 
 void Store::Initialize(){
-  delay(INITIALIZE_DELAY - setupTime); //Wait for store to align itself (setup)
+  unsigned long wait = INITIALIZE_DELAY - (millis() - setupTime);
+  if(wait > 0)
+    delay(wait); //Wait for store to align itself (setup)
   servoPosition += STORE_SERVO_MICROS_STEP*3; //Get rid of deadzone when changing directions
   servo.writeMicroseconds(servoPosition); //Set real initial servo
 };

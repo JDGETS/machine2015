@@ -15,7 +15,7 @@ private:
     unsigned long setupTime;
 public:
     const static int INITIALIZE_DELAY = 2000;
-    const static int STORE_SERVO_INITIAL_MICROS = 613; //Must be close enough to 600 (above)
+    const static int STORE_SERVO_INITIAL_MICROS = 623; //Must be close enough to 600 (above)
     const static int STORE_SERVO_MICROS_STEP = 27; //For 1/8 rotation
     Servo servo; 
     int servoPosition;

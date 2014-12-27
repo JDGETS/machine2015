@@ -9,6 +9,7 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Start magasin.");
   States::store.Setup();
+  States::store.Initialize();
 }
 
 void loop() {
