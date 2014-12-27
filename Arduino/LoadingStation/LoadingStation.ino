@@ -10,21 +10,14 @@
 #define CONVEYOR2_PIN           7
 
 //////// PWM //////// 
-#define ELEVATOR_STOP  1500
-#define ELEVATOR_RUN   1400
-#define DOOR_STOP      1500
-#define DOOR_RUN       1400
 #define CONVEYOR_RUN   1400
 #define CONVEYOR_STOP  1500
 
 //////// Variables //////// 
 LimitSwitch elevatorSwitch(ELEVATOR_SWITCH_PIN);
 LimitSwitch doorSwitch(DOOR_SWITCH_PIN);
-Servo elevator;
-Servo door;
 Servo conveyor1;
 Servo conveyor2;
-
 
 void setup() {    
   Serial.begin(9600);
@@ -32,18 +25,16 @@ void setup() {
   elevatorSwitch.Setup();
   doorSwitch.Setup();
   
-  elevator.attach(ELEVATOR_PIN); 
-  elevator.writeMicroseconds(ELEVATOR_STOP);
+  pinMode(ELEVATOR_PIN, OUTPUT);
+  pinMode(DOOR_PIN, OUTPUT);
+  digitalWrite(ELEVATOR_PIN, LOW);
+  digitalWrite(DOOR_PIN, LOW);
   
-  door.attach(DOOR_PIN);
-  door.writeMicroseconds(DOOR_STOP);
-  
+  conveyor1.writeMicroseconds(CONVEYOR_STOP); // Set initial position
   conveyor1.attach(CONVEYOR1_PIN);
-  Serial.print("Starting fixed conveyor belt.");
-  conveyor1.writeMicroseconds(CONVEYOR_RUN);
   
+  conveyor2.writeMicroseconds(CONVEYOR_STOP); // Set initial position
   conveyor2.attach(CONVEYOR2_PIN);
-  conveyor2.writeMicroseconds(CONVEYOR_STOP);
 }
 
 void loop(){  
@@ -52,28 +43,29 @@ void loop(){
   {
     Serial.print("Elevator door opened. Closing...");
     // On la ferme et on attend
-    door.writeMicroseconds(DOOR_RUN);
+    digitalWrite(DOOR_PIN, HIGH);
     doorSwitch.WaitForPress();
-    door.writeMicroseconds(DOOR_STOP);
+    digitalWrite(DOOR_PIN, LOW);
     Serial.print("Elevator door closed.");
   }
-  
-  // L'ascenseur n'est pas en haut
-  if ( ! elevatorSwitch.ReadInput() )
-  {
-    // Arreter le tapis sur l'ascenseur (au cas ou il roulerait...)
-    conveyor2.writeMicroseconds(CONVEYOR_STOP);
-    // On monte l'ascenseur et on attend
-    Serial.print("Starting elevator.");
-    elevator.writeMicroseconds(ELEVATOR_RUN);
-    elevatorSwitch.WaitForPress();
-    // Arreter l'ascenseur
-    elevator.writeMicroseconds(ELEVATOR_STOP); 
-    Serial.print("Stopping elevator.");
+  else{
+    // L'ascenseur n'est pas en haut
+    if ( ! elevatorSwitch.ReadInput() )
+    {
+      // Arreter le tapis sur l'ascenseur (au cas ou il roulerait...)
+      conveyor2.writeMicroseconds(CONVEYOR_STOP);
+      // On monte l'ascenseur et on attend
+      Serial.print("Starting elevator.");
+      digitalWrite(ELEVATOR_PIN, HIGH);
+      elevatorSwitch.WaitForPress();
+      // Arreter l'ascenseur
+      digitalWrite(ELEVATOR_PIN, LOW); 
+      Serial.print("Stopping elevator.");
+    }
+    else{
+      // Si les deux switches sont appuyées, on roule les deux tapis.
+      conveyor1.writeMicroseconds(CONVEYOR_RUN);
+      conveyor2.writeMicroseconds(CONVEYOR_RUN);
+    }
   }
-          
-  // Demarrer le tapis de l'ascenseur
-  Serial.print("Starting elevator's conveyor belt.");
-  conveyor2.writeMicroseconds(CONVEYOR_RUN);
- 
 }
