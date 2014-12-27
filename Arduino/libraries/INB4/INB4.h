@@ -1,8 +1,13 @@
 
 /******************************************************
 *
-*   BLANC = V_IN
+*   ROSE2, GRIS2, ..., GRIS1, ROSE1
 *   BRUN = GND
+*
+*
+*       SCRIPTING DE VITESSE
+*       MINIMUM TIME BETWEEN STATE CHANGE
+*
 *
 *******************************************************/
 
@@ -126,6 +131,8 @@ extern long int RIGHT_MOTOR_PWMVAL;
 
 extern XBeeComm XBEECOMM;
 extern LimitSwitch LIMIT_SWITCH;
+
+extern float OPTICAL_SENSOR_MIN_ACTIVE_VALUE;
 extern OpticalSensor OPTICAL_SENSOR;
 
 extern float RIGHT_MOTOR_RATIO;
@@ -175,19 +182,46 @@ struct OpticalSensor {
 
     void Setup() { pinMode(ANALOG_VO_PIN, INPUT); };
 
-    const float & ReadInput()
+    const float & ReadInputWithoutBounce()
     {
+        _lastRead = millis();
         _AnalogValue = analogRead(ANALOG_VO_PIN) * (5.0 / 1023.0);
-        _Active = (_AnalogValue > 4.70);
+        _Active = (_AnalogValue > OPTICAL_SENSOR_MIN_ACTIVE_VALUE);
+
+        return _AnalogValue;
+    }
+
+    const float & ReadInputWithBounce()
+    {
+        if (_lastRead + BOUNCING_VALUE < millis())
+        {
+            _lastRead = millis();
+            _AnalogValue = analogRead(ANALOG_VO_PIN) * (5.0 / 1023.0);
+            _Active = (_AnalogValue > OPTICAL_SENSOR_MIN_ACTIVE_VALUE);
+        }
+
         return _AnalogValue;
     };
 
     const float & AnalogValue() { return _AnalogValue; };
-    const bool IsActive() const { return _Active; };
+
+    const bool IsActiveWithoutBounce()
+    {
+        ReadInputWithoutBounce();
+        return _Active;
+    }
+
+    const bool IsActiveWithBounce()
+    {
+        ReadInputWithBounce();
+        return _Active;
+    };
 
 private:
+    static const unsigned long BOUNCING_VALUE = 10;
     float _AnalogValue;
     bool _Active;
+    unsigned long _lastRead;
 };
 
 
@@ -285,14 +319,14 @@ struct Motors {
         digitalWrite(LEFT_PIN_OUT.DIR_B_PIN, HIGH);
         _LeftPWN = 0;
         _LeftSpeed = 0.0;
-        _LeftDirectionRatio = 1.0;
+        //_LeftDirectionRatio = 1.0;
 
         digitalWrite(RIGHT_PIN_OUT.PWN_PIN, LOW);
         digitalWrite(RIGHT_PIN_OUT.DIR_A_PIN, LOW);
         digitalWrite(RIGHT_PIN_OUT.DIR_B_PIN, HIGH);
         _RightPWM  = 0;
         _RightSpeed = 0.0;
-        _RightDirectionRatio = 1.0;
+        //_RightDirectionRatio = 1.0;
 
         //Setup PWM
         //SET : Fast PWM with Timer OverFlow Interrupt
@@ -311,148 +345,98 @@ struct Motors {
     const float Speed(const MotorID id) const { return (id == MOTOR_RIGHT) ? _RightSpeed : _LeftSpeed; };
     void Speed(const MotorID id, const float value)
     {
-        static const float min = 0.0, max = 1.0;
+        static const float min = -1.0, max = 1.0;
 
         if (id == MOTOR_RIGHT)
         {
             _RightSpeed = (value > max) ? max : (value < min) ? min : value;
+
+            if (_RightSpeed > 0)
+            {
+                digitalWrite(RIGHT_PIN_OUT.DIR_A_PIN, LOW);
+                digitalWrite(RIGHT_PIN_OUT.DIR_B_PIN, HIGH);
+            }
+            else
+            {
+                digitalWrite(RIGHT_PIN_OUT.DIR_A_PIN, HIGH);
+                digitalWrite(RIGHT_PIN_OUT.DIR_B_PIN, LOW);
+            }
+
+            RIGHT_MOTOR_PWMVAL = map(
+                    (_RightSpeed > 0 ? _RightSpeed : -_RightSpeed) * 1599,
+                    0, 1599, 0, 1599);
         }
         else
         {
             _LeftSpeed = (value > max) ? max : (value < min) ? min : value;
-        }
 
-        UpdateMotors(); // write motors output
+
+            if (_LeftSpeed > 0)
+            {
+                digitalWrite(LEFT_PIN_OUT.DIR_A_PIN, LOW);
+                digitalWrite(LEFT_PIN_OUT.DIR_B_PIN, HIGH);
+            }
+            else
+            {
+                digitalWrite(LEFT_PIN_OUT.DIR_A_PIN, HIGH);
+                digitalWrite(LEFT_PIN_OUT.DIR_B_PIN, LOW);
+            }
+
+            LEFT_MOTOR_PWMVAL = map(
+                    ((_LeftSpeed > 0) ? _LeftSpeed : -_LeftSpeed) * 1599,
+                    0, 1599, 0, 1599);
+        }
     };
 
-    const float DirectionAngle() { return _DirectionAngle; };
-    void Direction(const DirectionID id, const float value)
+    void BalancedMotorsSpeed(const MotorID referenceMotor, const float speed)
     {
-        static const float min = -1.0, max = 1.0;
-        float ratio = (value > max) ? max : (value < min) ? min : value;
+        MotorPinOut master = (referenceMotor == MOTOR_RIGHT) ? RIGHT_PIN_OUT : LEFT_PIN_OUT,
+                slave = (referenceMotor == MOTOR_RIGHT) ? LEFT_PIN_OUT : RIGHT_PIN_OUT;
 
-        switch (id)
+        int masterADC = analogRead(master.ADC_PIN),
+                slaveADC = analogRead(slave.ADC_PIN);
+
+        if (masterADC == 0)
         {
-            case BACKWARD :
-            {
-                _DirectionAngle = 270.0;
-                _RightDirectionRatio = 1.0;
-                _LeftDirectionRatio = 1.0;
-                break;
-            };
-
-            case FORWARD :
-            {
-                _DirectionAngle = 90.0;
-                _RightDirectionRatio = -1.0;
-                _LeftDirectionRatio = -1.0;
-                break;
-            };
-
-            case TURN_LEFT :
-            {
-                if (ratio == 0.0)
-                {
-                    // tour a gauche avec faible rayon de bracage
-                }
-                else if (ratio > 0.0)
-                {
-                    // 90 - 180 | 1....0
-                    // sin = left
-                    // -cos = right
-
-                    _DirectionAngle = 90.0 + (90.0 * ratio);
-                    _LeftDirectionRatio = sin(_DirectionAngle);
-                    _RightDirectionRatio = -cos(_DirectionAngle);
-                }
-                else if (ratio < 0.0)
-                {
-                    // 270 - 180 | -1....0
-                    // sin = left
-                    // cos = right
-
-                    _DirectionAngle = 270.0 - (90.0 * abs(ratio));
-                    _LeftDirectionRatio = sin(_DirectionAngle);
-                    _RightDirectionRatio = cos(_DirectionAngle);
-                }
-
-                break;
-            };
-
-            case TURN_RIGHT :
-            {
-                if (ratio == 0.0)
-                {
-                    // droit a gauche avec faible rayon de bracage
-                }
-                else if (ratio > 0.0)
-                {
-                    // 90 - 0 | 1....0
-                    // cos = left
-                    // sin = right
-
-                    _DirectionAngle = 90.0 * ratio;
-                    _LeftDirectionRatio = cos(_DirectionAngle);
-                    _RightDirectionRatio = sin(_DirectionAngle);
-                }
-                else if (ratio < 0.0)
-                {
-                    // 270 - 360 | -1....0
-                    // -cos = left
-                    // sin = right
-
-                    _DirectionAngle = 360.0 - (90.0 * abs(ratio));
-                    _LeftDirectionRatio = -cos(_DirectionAngle);
-                    _RightDirectionRatio = sin(_DirectionAngle);
-                }
-
-                break;
-            };
-
-            default:
-                break;
+            masterADC = 1;
         }
 
-        UpdateMotors(); // write motors output
+        float masterSpeed = speed, slaveSpeed = speed + (slaveADC * masterSpeed / masterADC);
+
+        Serial.print(masterADC); Serial.print(" ");
+        Serial.print(slaveADC); Serial.print(" ");
+        Serial.print(masterSpeed); Serial.print(" ");
+        Serial.println(slaveSpeed);
+
+        MOTORS.Speed((referenceMotor == MOTOR_RIGHT) ? MOTOR_RIGHT : MOTOR_LEFT, masterSpeed);
+        MOTORS.Speed((referenceMotor == MOTOR_RIGHT) ? MOTOR_LEFT : MOTOR_RIGHT, slaveSpeed);
+
+        delay(40);
     }
 
-protected:
-
-    void UpdateMotors()
+    void RunSpeedScript(const unsigned int numberOfSteps, const float * leftMotorSpeeds,
+            const float * rightMotorSpeeds, const unsigned long * triggerTimes,
+            const unsigned long firstPassTime)
     {
+        int i = 0;
+        unsigned long currentTime = millis();
+        while (i < numberOfSteps)
+        {
+            if (firstPassTime + triggerTimes[i] > currentTime)
+            {
+                MOTORS.Speed(MOTOR_LEFT, leftMotorSpeeds[i]);
+                MOTORS.Speed(MOTOR_RIGHT, rightMotorSpeeds[i]);
+                break;
+            }
 
-        if (_LeftDirectionRatio < 0)
-        {
-            digitalWrite(LEFT_PIN_OUT.DIR_A_PIN, HIGH);
-            digitalWrite(LEFT_PIN_OUT.DIR_B_PIN, LOW);
+            i++;
         }
-        else
-        {
-            digitalWrite(LEFT_PIN_OUT.DIR_A_PIN, LOW);
-            digitalWrite(LEFT_PIN_OUT.DIR_B_PIN, HIGH);
-        }
+    }
 
-        if (_RightDirectionRatio < 0)
-        {
-            digitalWrite(RIGHT_PIN_OUT.DIR_A_PIN, HIGH);
-            digitalWrite(RIGHT_PIN_OUT.DIR_B_PIN, LOW);
-        }
-        else
-        {
-            digitalWrite(RIGHT_PIN_OUT.DIR_A_PIN, LOW);
-            digitalWrite(RIGHT_PIN_OUT.DIR_B_PIN, HIGH);
-        }
-
-        _LeftPWN = map(_LeftSpeed * 1599 * _RightDirectionRatio, 0, 1599, 0, 1599);
-        _RightPWM = map(_RightSpeed  * 1599 * _RightDirectionRatio * RIGHT_MOTOR_RATIO,
-                0, 1599, 0, 1599);
-    };
 
 private:
     long int &_RightPWM, &_LeftPWN;
     float _RightSpeed, _LeftSpeed;
-
-    float _RightDirectionRatio, _LeftDirectionRatio, _DirectionAngle;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -514,20 +498,9 @@ namespace States {
                 firstpass = false;
             }
 
-            OPTICAL_SENSOR.ReadInput();
-            if (OPTICAL_SENSOR.IsActive() && time + 3000 < millis())
+            if (OPTICAL_SENSOR.IsActiveWithBounce())
             {
-
-                MOTORS.Speed(MOTOR_LEFT, 0.00);
-                MOTORS.Speed(MOTOR_RIGHT, 0.00);
-
-                delay(1000);
-
-                MOTORS.Speed(MOTOR_LEFT, 0.50);
-                MOTORS.Speed(MOTOR_RIGHT, 0.50);
-
                 CURRENT_STATES_ID = MONTEE_AVEC_LANCEUR_STATE_ID;
-
                 active = false;
             }
             else
@@ -538,8 +511,8 @@ namespace States {
 
         void Execute() {
 
-            MOTORS.Speed(MOTOR_LEFT, 0.50);
-            MOTORS.Speed(MOTOR_RIGHT, 0.50);
+            MOTORS.Speed(MOTOR_LEFT, 0.35);
+            MOTORS.Speed(MOTOR_RIGHT, 0.35);
         };
 
         const bool & IsActive() { return active; };
@@ -556,22 +529,21 @@ namespace States {
 
         void Update() {
 
-            OPTICAL_SENSOR.ReadInput();
-            if (!OPTICAL_SENSOR.IsActive())
+            /*
+                    27 DEC 00:35 -> le char rentre dans la pente et change d'etat (le vehicule stop) presque immidiatement apr;es
+
+
+
+             */
+
+
+            if (!OPTICAL_SENSOR.IsActiveWithBounce()
+                    && _FirstExecuteTime + 2000 > millis())
             {
                 sommetDosDane = true;
             }
-            else if (OPTICAL_SENSOR.IsActive() && sommetDosDane)
+            else if (OPTICAL_SENSOR.IsActiveWithoutBounce() && sommetDosDane)
             {
-
-                MOTORS.Speed(MOTOR_LEFT, 0.00);
-                MOTORS.Speed(MOTOR_RIGHT, 0.00);
-
-                delay(1000);
-
-                MOTORS.Speed(MOTOR_LEFT, 0.50);
-                MOTORS.Speed(MOTOR_RIGHT, 0.50);
-
                 CURRENT_STATES_ID = DECENTE_AVEC_LANCEUR_STATE_ID;
                 active = false;
             }
@@ -583,13 +555,19 @@ namespace States {
 
         void Execute() {
 
-            MOTORS.Speed(MOTOR_LEFT, 0.50);
-            MOTORS.Speed(MOTOR_RIGHT, 0.50);
+            if (_FirstExecuteTime == 0)
+            {
+                _FirstExecuteTime = millis();
+            }
+
+            MOTORS.Speed(MOTOR_LEFT, 0.35);
+            MOTORS.Speed(MOTOR_RIGHT, 0.35);
         };
 
         const bool & IsActive() { return active; };
 
     private:
+        unsigned long _FirstExecuteTime = 0;
         bool active;
         bool sommetDosDane;
     };
@@ -600,19 +578,10 @@ namespace States {
 
         void Update()
         {
-            OPTICAL_SENSOR.ReadInput();
-            if (!OPTICAL_SENSOR.IsActive())
+            if (!OPTICAL_SENSOR.IsActiveWithBounce()
+                    || _FirstExecuteTime + 1500 > millis())
             {
-
-                MOTORS.Speed(MOTOR_LEFT, 0.00);
-                MOTORS.Speed(MOTOR_RIGHT, 0.00);
-
-                delay(1000);
-
-                MOTORS.Speed(MOTOR_LEFT, 0.50);
-                MOTORS.Speed(MOTOR_RIGHT, 0.50);
-
-                CURRENT_STATES_ID = PARCOURS_AVEC_LANCEUR_STATE_ID;
+                CURRENT_STATES_ID = VIRAGE_ENTREE_ZONE_LANCEMENT_STATE_ID;
                 active = false;
             }
             else
@@ -623,13 +592,19 @@ namespace States {
 
         void Execute()
         {
-            MOTORS.Speed(MOTOR_LEFT, 0.50);
-            MOTORS.Speed(MOTOR_RIGHT, 0.50);
+            if (_FirstExecuteTime == 0)
+            {
+                _FirstExecuteTime = millis();
+            }
+
+            MOTORS.Speed(MOTOR_LEFT, -0.34);
+            MOTORS.Speed(MOTOR_RIGHT, -0.34);
         };
 
         const bool & IsActive() { return active; };
 
     private:
+        unsigned long _FirstExecuteTime = 0;
         bool active;
     };
 }
@@ -638,23 +613,73 @@ namespace States {
 
     struct VirageEntreeZoneLancement {
 
-        VirageEntreeZoneLancement() : active(false) {};
+        VirageEntreeZoneLancement() : active(false), firstPass(true),
+            switchNextState(false) {};
 
         void Update()
         {
-            active = true;
+            if (switchNextState)
+            {
+                CURRENT_STATES_ID = ALIGNEMENT_REEDSWITCH_ZONE_LANCEMENT_STATE_ID;
+                active = false;
+            }
+            else
+            {
+                active = true;
+            }
         };
 
         void Execute()
         {
-            MOTORS.Speed(MOTOR_LEFT, 0.00);
-            MOTORS.Speed(MOTOR_RIGHT, 0.00);
+            static bool firstExecute = true;
+            static bool turnTriggered = false;
+            static unsigned long turnTime = 0;
+
+            /*
+                    26 DEC - 23:57 -> la roue de droite a pogner le rebors alors certain event non pas peut faire se qu'il devait faire a cause de ca ex: reculer avec la roue de droit
+                    27 DEC - 00:04 -> la dernier step de RunSpeedScript n'a pas etait pris en compte et l'avant dernier step est rester indefiniment et les dernier step a etait ignorer
+                    27 DEC - 00:09 -> la roue de gauche a pogner le rebors alors certain event non pas pu faire se qu'il devait faire
+
+
+
+             */
+
+
+            static const unsigned long startTime        = millis();
+            static const unsigned int nbStep            = 10;
+            static const float leftSpeeds[nbStep]       = {
+                    0.0, -0.14, 0.22, -0.45, -0.80, 0.0,
+                    -0.60, 0.0, 0.35,
+
+                    0.0
+            };
+
+            static const float rightSpeeds[nbStep]      = {
+                    0.0, -0.14, 0.22, 0.55, 0.20, 0.70,
+                    0.0, 0.50, 0.35,
+
+                    0.0
+            };
+
+            static const unsigned long timing[nbStep]   = {
+                    500, 1500, 1650, 1900, 2000, 2100,
+                    2300, 2450, 2950,
+
+                    2952
+            };
+
+            MOTORS.RunSpeedScript(nbStep, leftSpeeds, rightSpeeds, timing, startTime);
+
         };
 
         const bool & IsActive() { return active; };
 
     private:
+        bool switchNextState;
         bool active;
+        bool firstPass;
+        unsigned long time;
+
     };
 
     struct AlignmentReedSwitchZoneLancement {
@@ -663,16 +688,20 @@ namespace States {
 
         void Update() {
 
+            active = true;
         };
 
         void Execute() {
 
+            MOTORS.Speed(MOTOR_LEFT, 0.00);
+            MOTORS.Speed(MOTOR_RIGHT, 0.00);
         };
 
         const bool & IsActive() { return active; };
 
     private:
         bool active;
+
     };
 
     struct DeploiementCanon {
@@ -871,20 +900,34 @@ namespace States {
 
 #endif INB4_H
 
+class MotorRebalancing
+{
+public:
+
+private:
+
+};
+
+
+
 long int LEFT_MOTOR_PWMVAL = 0;
 long int RIGHT_MOTOR_PWMVAL = 0;
 
 XBeeComm XBEECOMM               = XBeeComm(10, 9, 57600);
 LimitSwitch LIMIT_SWITCH        = LimitSwitch(46);
-OpticalSensor OPTICAL_SENSOR    = OpticalSensor(A12);
+
+float OPTICAL_SENSOR_MIN_ACTIVE_VALUE   = 4.85;
+OpticalSensor OPTICAL_SENSOR            = OpticalSensor(A12);
 
 float RIGHT_MOTOR_RATIO = 0.65;
+float MOTOR_MIN_SPEED = 0.25, MOTOR_MAX_SPEED = 1.0;
+
 MotorPinOut LEFT_MOTOR_PIN_OUT   = MotorPinOut(A0, A1, 11, A2);
 MotorPinOut RIGHT_MOTOR_PIN_OUT  = MotorPinOut(A5, A4, 12, A3);
 Motors MOTORS                    = Motors(RIGHT_MOTOR_PIN_OUT, LEFT_MOTOR_PIN_OUT);
 
 
-unsigned short CURRENT_STATES_ID = 0; //States::PARCOURS_AVEC_LANCEUR_STATE_ID;
+unsigned short CURRENT_STATES_ID = States::PARCOURS_AVEC_LANCEUR_STATE_ID;
 
 namespace States {
 
@@ -925,9 +968,17 @@ void INB4::setup() {
 
 void INB4::loop() {
 
+    static bool firstPass = true;
+
     static int xBeeRead;
     static float motorSpeed; static const float motorSpeedMin = 0.0, motorSpeedMax = 1.0;
     static float motorDirection; static const float motorDirectionMin = -1.0, motorDirectionMax = 1.0;
+
+    if (firstPass)
+    {
+
+        firstPass = false;
+    }
 
     xBeeRead = (XBEECOMM.available()) ? XBEECOMM.read() : 0;
 
@@ -961,32 +1012,32 @@ void INB4::loop() {
 
         case KEYBOARD_A:
         {
-            motorDirection -= (motorDirection > motorDirectionMin) ? 0.05 : 0.0;
+           // motorDirection -= (motorDirection > motorDirectionMin) ? 0.05 : 0.0;
 
-            if (motorDirection < 0.0)
-            {
-                MOTORS.Direction(TURN_LEFT, abs(motorDirection));
-            }
-            else
-            {
-                MOTORS.Direction(TURN_RIGHT, motorDirection);
-            }
+           // if (motorDirection < 0.0)
+           // {
+           //     MOTORS.Direction(TURN_LEFT, abs(motorDirection));
+           // }
+           // else
+            //{
+            //    MOTORS.Direction(TURN_RIGHT, motorDirection);
+           // }
 
             break;
         };
 
         case KEYBOARD_D:
         {
-            motorDirection += (motorDirection < motorDirectionMax) ? 0.05  : 0.0;
+           // motorDirection += (motorDirection < motorDirectionMax) ? 0.05  : 0.0;
 
-            if (motorDirection < 0.0)
-            {
-                MOTORS.Direction(TURN_LEFT, abs(motorDirection));
-            }
-            else
-            {
-                MOTORS.Direction(TURN_RIGHT, motorDirection);
-            }
+           // if (motorDirection < 0.0)
+           // {
+            //    MOTORS.Direction(TURN_LEFT, abs(motorDirection));
+           // }
+            //else
+           //{
+                //MOTORS.Direction(TURN_RIGHT, motorDirection);
+           //}
 
             break;
         };
@@ -1017,35 +1068,127 @@ void INB4::loop() {
     ///                                                                     ///
     ///////////////////////////////////////////////////////////////////////////
 
-    //MOTORS.Speed(MOTOR_RIGHT, 1.0);
-    //MOTORS.Speed(MOTOR_LEFT, 1.0);
 
-    //LEFT_MOTOR_PWMVAL = map(0.7 * 1599, 0, 1599, 0, 1599);
-    //RIGHT_MOTOR_PWMVAL = map(0.7 * 0.65 * 1599, 0, 1599, 0, 1599);
 
 
     //CURRENT_STATES_ID = 0;
 
-    OPTICAL_SENSOR.ReadInput();
-    if (OPTICAL_SENSOR.IsActive())
+    //MOTORS.Speed(MOTOR_LEFT, -0.14);
+    //MOTORS.Speed(MOTOR_RIGHT, -0.14);
+
+    //const unsigned int nbStep               = 5;
+    //const float leftSpeeds[nbStep]          = {0.30, 0.50, -0.50, -0.30, 0.00};
+    //const float rightSpeeds[nbStep]         = {0.30, -0.50, 0.50, -0.30, 0.00};
+    //const unsigned long timing[nbStep]      = {1000, 1500, 2000, 2500, 3000};
+    //static const unsigned long startTime    = millis();
+
+    //MOTORS.RunSpeedScript(nbStep, leftSpeeds, rightSpeeds, timing, startTime);
+
+
+
+
+    /*
+    MOTORS.Speed(MOTOR_LEFT, -0.290);
+    MOTORS.Speed(MOTOR_RIGHT, -0.180);
+
+
+
+    if (analogRead(MOTORS.RIGHT_PIN_OUT.ADC_PIN) > 2)
     {
-        Serial.print("TRUE "); Serial.print(OPTICAL_SENSOR.AnalogValue()); Serial.println("v");
+        MOTORS.Speed(MOTOR_LEFT, 0.0);
+    }
+    */
+
+
+    /*
+    if ((millis() / 250) % 3 == 0)
+    {
+
+
+        MOTORS.Speed(MOTOR_LEFT, -0.45);
+        MOTORS.Speed(MOTOR_RIGHT, -0.28);
+        //Serial.println("||||||||||||||");
     }
     else
     {
-        Serial.print("FALSE "); Serial.print(OPTICAL_SENSOR.AnalogValue()); Serial.println("v");
+        MOTORS.Speed(MOTOR_LEFT, 0.00);
+        MOTORS.Speed(MOTOR_RIGHT, 0.00);
+        //Serial.println(" ");
     }
+    */
+
+
+
+    //MOTORS.Speed(MOTOR_LEFT, -0.30);
+    //MOTORS.Speed(MOTOR_RIGHT, -0.30);
+
+    //MOTORS.BalancedMotorsSpeed(MOTOR_LEFT, 0.30);
+    //MOTORS.Direction(TURN_LEFT);
+    //MOTORS.Speed(MOTOR_RIGHT, -0.15);
+    //MOTORS.Speed(MOTOR_LEFT, -0.15);
+
+
+    //MOTORS.Speed(MOTOR_RIGHT, 0.30);
+    //MOTORS.Speed(MOTOR_LEFT, 0.30);
+    
+
+
+    //Serial.println(analogRead(MOTORS.LEFT_PIN_OUT.ADC_PIN));
+
+
+    //delay(1000);
+
+    //MOTORS.Direction(FORWARD);
+    //MOTORS.Speed(MOTOR_RIGHT, 0.00);
+    //MOTORS.Speed(MOTOR_LEFT, 0.00);
+
+    //delay(6000);
+
+    //LEFT_MOTOR_PWMVAL = map(0.3 * 1599, 0, 1599, 0, 1599);
+    //RIGHT_MOTOR_PWMVAL = map(0.3 * 1599, 0, 1599, 0, 1599);
+
+
+
+    static bool lastOpticalSensorValue = false;
+
+    CURRENT_STATES_ID = 0;
+
+
+    lastOpticalSensorValue = OPTICAL_SENSOR.IsActiveWithoutBounce();
+
+    //OPTICAL_SENSOR.ReadInput();
+    if (OPTICAL_SENSOR.IsActiveWithoutBounce())
+    {
+        float value = OPTICAL_SENSOR.AnalogValue();
+
+        if (value != 0.0)
+        {
+            Serial.println(value);
+        }
+
+
+    }
+    else
+    {
+        float value = OPTICAL_SENSOR.AnalogValue();
+
+        if (value != 0.0)
+        {
+           Serial.println(value);
+        }
+    }
+
 
 
     //Serial.print(OPTICAL_SENSOR.ReadInput()); Serial.println("v");
 
 
-    MOTORS.Speed(MOTOR_RIGHT, 0.60);
-    MOTORS.Speed(MOTOR_LEFT, 0.60);
+    //MOTORS.Speed(MOTOR_RIGHT, 0.60);
+    //MOTORS.Speed(MOTOR_LEFT, 0.60);
 
 
 
-    //delay(30);
+    //delay(50);
 
 
     ///////////////////////////////////////////////////////////////////////////
