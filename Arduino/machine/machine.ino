@@ -1,9 +1,14 @@
 
 
 #include <Arduino.h>
-
 #include <SoftwareSerial.h>
 
+#include "LimitSwitch.h"
+#include "OpticalSensor.h"
+#include "ReedSwitch.h"
+#include "XBeeComm.h"
+#include "StateINB4.h"
+#include "Motors.h"
 
 #define SKETCH
 
