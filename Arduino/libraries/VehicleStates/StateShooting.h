@@ -26,8 +26,8 @@ namespace Vehicle{
         unsigned long time = millis();
         Serial.println(time);
         
-        shooterSwitch.ResetDebouncing();
-        shooterSwitch.WaitForPress(); // Switch is pressed, now we can start our sequence
+        shooterSensor.ResetDebouncing();
+        shooterSensor.WaitForActive(); // Switch is pressed, now we can start our sequence
         Serial.println("Waiting for first hole...");
         ReadDataHole(&first);
         Serial.println("Waiting for second hole...");
@@ -67,9 +67,11 @@ namespace Vehicle{
       } 
 
       void ReadDataHole(Hole *hole){
-        shooterSwitch.WaitForRelease();
+        shooterSensor.WaitForInactive();
+        Serial.println("DANS LE VIDE!");
         hole->beginning = millis();
-        shooterSwitch.WaitForPress();
+        shooterSensor.WaitForActive();
+        Serial.println("JE VOIS TON CUL");
         hole->end = millis();
         hole->time = hole->end - hole->beginning;
       }

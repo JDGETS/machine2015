@@ -11,8 +11,8 @@ void setup()
   
   States::Charging charging;
   Serial.println("Starting Charging.");
-  charging.Execute();
-  
+  //charging.Execute();
+  store.bagsCount = 1;
   States::Shooting shooting;
   Serial.println("Starting Shooting.");
   shooting.Execute();

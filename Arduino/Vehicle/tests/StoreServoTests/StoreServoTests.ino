@@ -23,12 +23,12 @@ void loop() {
 
   if (readString.length() > 0) {
     if(readString == "1"){ // Move one empty (calibration)
-      store.servoPosition += Store::STORE_SERVO_MICROS_STEP;
+      store.servoPosition += STORE_SERVO_MICROS_STEP;
       store.servo.writeMicroseconds(store.servoPosition);
       Serial.print("Microseconds is: ");
       Serial.println(store.servoPosition);
     }
-    if(readString == "q"){ // Load bag
+    else if(readString == "q"){ // Load bag
       Serial.print("Loading one bag. total=");
       Serial.println(store.bagsCount);
       store.ServoLoadBag();
