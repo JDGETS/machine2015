@@ -11,13 +11,17 @@ void OpticalSensor::Setup()
   pinMode(ANALOG_VO_PIN, INPUT);
 };
 
-const float & OpticalSensor::ReadInput()
+float & OpticalSensor::ReadInput()
 {
-  if(inverted)
-    _AnalogValue = analogRead(ANALOG_VO_PIN) * (5.0 / 1023.0);
-  else
-    _AnalogValue = (1023 - analogRead(ANALOG_VO_PIN)) * (5.0 / 1023.0);
-  _Active = (_AnalogValue > MIN_ACTIVE_VALUE );
+  _AnalogValue = analogRead(ANALOG_VO_PIN) * (5.0 / 1023.0);
+
+  if(_Inverted)
+    _AnalogValue = 5 - _AnalogValue;
+
+  if(_AnalogValue == 0 && IGNORE_ZEROS)
+    return _AnalogValue; // Don't change _AnalogValue;
+
+  _Detected = (_AnalogValue < MIN_TRIGGER_VALUE );
 
   return _AnalogValue;
 }
@@ -27,12 +31,12 @@ const float & OpticalSensor::AnalogValue()
   return _AnalogValue;
 };
 
-const bool OpticalSensor::IsActive() const 
+const bool OpticalSensor::IsDetected() const 
 {
-  return _Active;
+  return _Detected;
 };
 
-const bool OpticalSensor::LongReadInput(bool ifUnsure)
+bool OpticalSensor::LongReadInput(bool ifUnsure)
 {
     unsigned long delay = LONG_READ_TIME;
     unsigned long start = micros();
@@ -42,8 +46,7 @@ const bool OpticalSensor::LongReadInput(bool ifUnsure)
     {
         count++;
         ReadInput();
-        total += (int)(IsActive());
-        delayMicroseconds(20);
+        total += (int)(IsDetected());
 
         if(micros() - start > delay)
         {
@@ -63,26 +66,31 @@ const bool OpticalSensor::LongReadInput(bool ifUnsure)
     }
 };
 
-void OpticalSensor::Invert() 
-{
-  inverted = !inverted;
-};
+void OpticalSensor::Invert(){
+  _Inverted = !_Inverted;
+}
 
 void OpticalSensor::ResetDebouncing()
 {
   lastStatusChange = 0;
 }
 
-void OpticalSensor::WaitForActive()
+void OpticalSensor::WaitForDetect()
 {
   while(millis() < lastStatusChange + DEBOUNCE_TIME); //Debounce
-  while(!IsActive()) ReadInput();
+  if(useLongRead)
+    while(!LongReadInput(false));
+  else
+    while(!IsDetected()) ReadInput();
   lastStatusChange = millis();
 }
 
-void OpticalSensor::WaitForInactive()
+void OpticalSensor::WaitForUndetect()
 {
   while(millis() < lastStatusChange + DEBOUNCE_TIME); //Debounce
-  while(IsActive()) ReadInput();
+  if(useLongRead)
+    while(LongReadInput(true));
+  else
+    while(IsDetected()) ReadInput();
   lastStatusChange = millis();
 }

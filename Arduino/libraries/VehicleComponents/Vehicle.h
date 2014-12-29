@@ -1,6 +1,7 @@
 #ifndef VEHICLE_H
 #define VEHICLE_H
 
+#include <Arduino.h>
 #include <Servo.h>
 #include <Hardware.h>
 #include <Store.h>
@@ -8,10 +9,11 @@
 
 // Pins
 #define VEHICLE_SERVO_PIN           5 //Will be 6
+#define VEHICLE_SENSOR_PIN          A9
 #define STORE_SERVO_PIN             6 //Will be 5
 #define STORE_DETECT_BAG_SWITCH_PIN 22
 //#define SHOOTER_SWITCH_PIN        38
-#define SHOOTER_SENSOR_PIN          A8 //Will be A8
+#define SHOOTER_SENSOR_PIN          A8 
 #define SHOOTER_MOTOR_MOSFET        7
 
 // Motors configuration // Use MotorPinOut defined in Motors.cpp
@@ -23,6 +25,9 @@
 #define VEHICLE_SERVO_MAX_MICROS    2400 
 #define STORE_SERVO_MIN_MICROS      600
 #define STORE_SERVO_MAX_MICROS      2400 
+
+// Vehicle
+#define VEHICLE_SENSOR_MIN_VALUE    0.15
 
 // Store
 #define STORE_SERVO_INITIAL_MICROS  620   // Must be close enough to 600 (STORE_SERVO_MIN_MICROS)
@@ -63,6 +68,8 @@ namespace Vehicle{
   //extern LimitSwitch shooterSwitch;
   extern OpticalSensor shooterSensor;
   extern Servo vehicleServo;
+  extern OpticalSensor bottomOpticalSensor;
+
   void Setup();
 
   namespace States{};

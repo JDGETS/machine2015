@@ -7,6 +7,7 @@ namespace Vehicle{
   //LimitSwitch shooterSwitch(SHOOTER_SWITCH_PIN);
   OpticalSensor shooterSensor(SHOOTER_SENSOR_PIN);
   Servo vehicleServo; // Used to drop the shooter
+  OpticalSensor bottomOpticalSensor(VEHICLE_SENSOR_PIN);
 
   void Setup(){
     //Init motor before servos (interference)
@@ -15,13 +16,17 @@ namespace Vehicle{
 
     motors.Setup();
 
+    bottomOpticalSensor.Setup();
+    bottomOpticalSensor.Invert();
+    bottomOpticalSensor.SetMinTriggerValue(VEHICLE_SENSOR_MIN_VALUE);
+    bottomOpticalSensor.SetUseLongRead(true);
+
     store.Setup();
 
     storeBagInSwitch.Setup();
     //shooterSwitch.Setup();
     shooterSensor.Setup();
     shooterSensor.SetDebounceTime(SHOOTER_SENSOR_DEBOUNCE_TIME);
-    shooterSensor.Invert();
 
     //Configure the right values first.
     //vehicleServo.writeMicroseconds(VEHICLE_SERVO_INITIAL_MICROS);

@@ -1,3 +1,5 @@
+#ifndef STATESHOOTING_H
+#define STATESHOOTING_H
 #include "Vehicle.h"
 using namespace Vehicle;
 
@@ -27,7 +29,7 @@ namespace Vehicle{
         Serial.println(time);
         
         shooterSensor.ResetDebouncing();
-        shooterSensor.WaitForActive(); // Switch is pressed, now we can start our sequence
+        shooterSensor.WaitForDetect(); // Switch is pressed, now we can start our sequence
         Serial.println("Waiting for first hole...");
         ReadDataHole(&first);
         Serial.println("Waiting for second hole...");
@@ -67,10 +69,10 @@ namespace Vehicle{
       } 
 
       void ReadDataHole(Hole *hole){
-        shooterSensor.WaitForInactive();
+        shooterSensor.WaitForUndetect();
         Serial.println("DANS LE VIDE!");
         hole->beginning = millis();
-        shooterSensor.WaitForActive();
+        shooterSensor.WaitForDetect();
         Serial.println("JE VOIS TON CUL");
         hole->end = millis();
         hole->time = hole->end - hole->beginning;
@@ -97,3 +99,4 @@ namespace Vehicle{
     };
   }
 }
+#endif

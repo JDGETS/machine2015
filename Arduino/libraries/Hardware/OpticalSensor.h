@@ -15,35 +15,40 @@ struct OpticalSensor {
     OpticalSensor(uint8_t ANALOG_VO_PIN)
             : ANALOG_VO_PIN(ANALOG_VO_PIN), 
             _AnalogValue(0.0), 
-            _Active(false), 
-            inverted(false),
-            LONG_READ_TIME(250), 
+            _Detected(false), 
+            _Inverted(false),
+            useLongRead(false), 
+            LONG_READ_TIME(2500), 
             DEBOUNCE_TIME(100), 
-            MIN_ACTIVE_VALUE(4.80) {};
+            MIN_TRIGGER_VALUE(4.80),
+            IGNORE_ZEROS(false) {};
 
     void Setup();
 
-    const float & ReadInput();
+    float & ReadInput();
     const float & AnalogValue();
-    const bool IsActive() const;
-    const bool LongReadInput(bool ifUnsure);
+    const bool IsDetected() const;
+    bool LongReadInput(bool ifUnsure);
 
     void ResetDebouncing();
-    void WaitForActive();
-    void WaitForInactive();
+    void WaitForDetect();
+    void WaitForUndetect();
 
-    void Invert(); // By default, 1023 = something is in front, 0 = infinite distance, if you want to invert this, call Invert()
+    void Invert(); // By default, 0 is infinite distance
 
-    void SetMinActiveValue(float min){ MIN_ACTIVE_VALUE = min; };
+    void SetMinTriggerValue(float min){ MIN_TRIGGER_VALUE = min; };
     void SetDebounceTime(unsigned long millis){ DEBOUNCE_TIME = millis; };
     void SetLongReadTime(unsigned long micros){ LONG_READ_TIME = micros; };
+    void SetUseLongRead(bool useLongRead){ this->useLongRead = true; };
 private:
-    float MIN_ACTIVE_VALUE;
+    float MIN_TRIGGER_VALUE;
     unsigned long LONG_READ_TIME;
     unsigned long DEBOUNCE_TIME;
+    unsigned long IGNORE_ZEROS;
     float _AnalogValue;
-    bool _Active;
-    bool inverted;
+    bool _Detected;
+    bool _Inverted;
+    bool useLongRead;
     unsigned long lastStatusChange;
 };
 
