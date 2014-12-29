@@ -53,7 +53,8 @@
 #define VEHICLE_SERVO_DELAY             2000  // Delay required to drop the shooter on the ground
 
 // Racing
-#define RACING_MOTOR_SPEED 0.50
+#define RACING_LEFT_MOTOR_SPEED 0.65
+#define RACING_RIGHT_MOTOR_SPEED 0.60
 
 namespace Vehicle{
   extern Motors motors;

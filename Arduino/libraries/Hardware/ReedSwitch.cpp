@@ -24,6 +24,9 @@ const bool ReedSwitch::IsActive()
 /// ----------------------------------------------------------------------- ///
 ///////////////////////////////////////////////////////////////////////////////
 
+PairedReedSwitch::PairedReedSwitch()
+    : TOP_PIN(0), BOTTOM_PIN(0), _TopReedSwitch(0), _BottomReedSwitch(0)
+{};
 
 PairedReedSwitch::PairedReedSwitch(uint8_t TOP_PIN, uint8_t BOTTOM_PIN)
     : TOP_PIN(TOP_PIN), BOTTOM_PIN(BOTTOM_PIN),
@@ -57,7 +60,7 @@ const bool PairedReedSwitch::IsInRange()
 
 VehicleReedSwitches::VehicleReedSwitches(PairedReedSwitch indexZero, PairedReedSwitch indexOne,
         PairedReedSwitch indexTwo, PairedReedSwitch indexThree)
-        : ARRAY({indexOne, indexOne, indexOne, indexOne})
+        :ARRAY({indexZero, indexOne, indexTwo, indexThree})
 {};
 
 void VehicleReedSwitches::Setup()

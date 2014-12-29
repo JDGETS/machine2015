@@ -26,7 +26,9 @@ class PairedReedSwitch {
 public:
     const uint8_t TOP_PIN, BOTTOM_PIN;
 
+    PairedReedSwitch();
     PairedReedSwitch(uint8_t TOP_PIN, uint8_t BOTTOM_PIN);
+
     void Setup();
     const bool IsBottomReedSwitchActive();
     const bool IsTopReedSwitchActive();
@@ -41,6 +43,7 @@ class VehicleReedSwitches {
 public:
     PairedReedSwitch ARRAY[4];
 
+    //VehicleReedSwitches();
     VehicleReedSwitches(PairedReedSwitch indexZero, PairedReedSwitch indexOne,
             PairedReedSwitch indexTwo, PairedReedSwitch indexThree);
 

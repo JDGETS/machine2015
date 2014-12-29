@@ -12,8 +12,8 @@ namespace Vehicle{
 
       void Execute() 
       {
-        MOTORS.Speed(MOTOR_LEFT, RACING_MOTOR_SPEED);
-        MOTORS.Speed(MOTOR_RIGHT, RACING_MOTOR_SPEED);
+        MOTORS.Speed(MOTOR_LEFT, RACING_LEFT_MOTOR_SPEED);
+        MOTORS.Speed(MOTOR_RIGHT, RACING_RIGHT_MOTOR_SPEED);
         // Never call End();
         return;
       }
