@@ -14,6 +14,10 @@
 #define SHOOTER_SENSOR_PIN          A8 //Will be A8
 #define SHOOTER_MOTOR_MOSFET        7
 
+// Motors configuration // Use MotorPinOut defined in Motors.cpp
+#define LEFT_MOTOR_PIN_OUT MotorPinOut(A0, A1, 11, A2)
+#define RIGHT_MOTOR_PIN_OUT MotorPinOut(A5, A4, 12, A3)
+
 // Servo configuration
 #define VEHICLE_SERVO_MIN_MICROS    600
 #define VEHICLE_SERVO_MAX_MICROS    2400 
@@ -48,13 +52,16 @@
 #define VEHICLE_SERVO_FINAL_MICROS      623   // Must be close enough to (VEHICLE_SERVO_MIN_MICROS)
 #define VEHICLE_SERVO_DELAY             2000  // Delay required to drop the shooter on the ground
 
+// Racing
+#define RACING_MOTOR_SPEED 0.50
+
 namespace Vehicle{
+  extern Motors motors;
   extern Vehicle::Store store;
   extern LimitSwitch storeBagInSwitch;
   //extern LimitSwitch shooterSwitch;
   extern OpticalSensor shooterSensor;
   extern Servo vehicleServo;
-
   void Setup();
 
   namespace States{};

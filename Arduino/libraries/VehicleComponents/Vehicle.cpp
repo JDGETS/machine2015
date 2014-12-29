@@ -1,6 +1,7 @@
 #include "Vehicle.h"
 
 namespace Vehicle{
+  Motors motors(RIGHT_MOTOR_PIN_OUT, LEFT_MOTOR_PIN_OUT);
   Vehicle::Store store;
   LimitSwitch storeBagInSwitch(STORE_DETECT_BAG_SWITCH_PIN);
   //LimitSwitch shooterSwitch(SHOOTER_SWITCH_PIN);
@@ -11,6 +12,8 @@ namespace Vehicle{
     //Init motor before servos (interference)
     pinMode(SHOOTER_MOTOR_MOSFET, OUTPUT);
     digitalWrite(SHOOTER_MOTOR_MOSFET, LOW);
+
+    motors.Setup();
 
     store.Setup();
 

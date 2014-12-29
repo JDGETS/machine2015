@@ -15,6 +15,12 @@ MotorPinOut LEFT_MOTOR_PIN_OUT   = MotorPinOut(A0, A1, 11, A2);
 MotorPinOut RIGHT_MOTOR_PIN_OUT  = MotorPinOut(A5, A4, 12, A3);
 Motors MOTORS                    = Motors(RIGHT_MOTOR_PIN_OUT, LEFT_MOTOR_PIN_OUT);
 
+ISR(TIMER1_OVF_vect)
+{
+    OCR1A = LEFT_MOTOR_PWMVAL ;
+    OCR1B = RIGHT_MOTOR_PWMVAL ;
+}
+
 void Motors::Setup()
 {
     delayMicroseconds(100);
