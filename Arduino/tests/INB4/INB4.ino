@@ -9,6 +9,14 @@
 *
 *
 *******************************************************/
+#include <Arduino.h>
+#include <SoftwareSerial.h>
+#include <Servo.h>
+
+#include "Hardware.h"
+#include "XBeeComm.h"
+#include "Vehicle.h"
+#include "AllStates.h"
 
 // XBEECOM KEYBOARD BINDING
 #define KEYBOARD_1 153
@@ -30,33 +38,13 @@
 #define KEYBOARD_X 184
 #define KEYBOARD_C 179
 
-#ifndef INB4_H
-#define INB4_H
-
-    #ifndef SKETCH
-    #include "/usr/share/arduino/hardware/arduino/cores/arduino/Arduino.h"
-
-    #define USBCON
-    #include "/usr/share/arduino/hardware/arduino/cores/arduino/USBAPI.h"
-    #include "/usr/share/arduino/libraries/SoftwareSerial/SoftwareSerial.h"
-    #include "/usr/share/arduino/hardware/arduino/variants/mega/pins_arduino.h"
-
-    #include "/usr/share/arduino/hardware/tools/avr/lib/avr/include/avr/iomxx0_1.h"
-    #include "/usr/share/arduino/hardware/tools/avr/lib/avr/include/math.h"
-
-    //#include "/usr/share/arduino/hardware/tools/avr/lib/avr/include/avr/interrupt.h"
-    //#include "/usr/share/arduino/hardware/tools/avr/lib/avr/include/avr/io.h"
-    #endif
-
-#endif INB4_H
-
-
-
-
 XBeeComm XBEECOMM               = XBeeComm(10, 9, 57600);
-LimitSwitch LIMIT_SWITCH        = LimitSwitch(46);
 
-OpticalSensor OPTICAL_SENSOR            = OpticalSensor(A9);
+namespace INB4{
+  void setup();
+  void loop();
+  void showXBeeCommRead(const int&);
+}
 
 void INB4::setup() {
 
@@ -64,8 +52,7 @@ void INB4::setup() {
     Serial.begin(9600);
     delayMicroseconds(100);
 
-    MOTORS.Setup();
-    OPTICAL_SENSOR.Setup();
+    Vehicle::Setup();
 }
 
 void INB4::loop() {
@@ -294,206 +281,7 @@ void INB4::loop() {
     ///                                                                     ///
     ///////////////////////////////////////////////////////////////////////////
 
-    switch (CURRENT_STATES_ID){
-
-        case States::CHARGEMENT_BATTERIE_STATE_ID :
-        {
-            States::CHARGEMENT_BATTERIE.Update();
-            if (States::CHARGEMENT_BATTERIE.IsActive())
-            {
-                States::CHARGEMENT_BATTERIE.Execute();
-            }
-
-            break;
-        }
-
-        case States::NOUVELLE_POCHE_DANS_MAGASIN_STATE_ID :
-        {
-            States::NOUVELLE_POCHE_DANS_MAGASIN.Update();
-            if (States::NOUVELLE_POCHE_DANS_MAGASIN.IsActive())
-            {
-                States::NOUVELLE_POCHE_DANS_MAGASIN.Execute();
-            }
-
-            break;
-        }
-
-
-        case States::PARCOURS_AVEC_LANCEUR_STATE_ID:
-        {
-            States::PARCOURS_AVEC_LANCEUR.Update();
-            if (States::PARCOURS_AVEC_LANCEUR.IsActive())
-            {
-                States::PARCOURS_AVEC_LANCEUR.Execute();
-            }
-
-            break;
-        };
-
-        case States::MONTEE_AVEC_LANCEUR_STATE_ID :
-        {
-            States::MONTEE_AVEC_LANCER.Update();
-            if (States::MONTEE_AVEC_LANCER.IsActive())
-            {
-                States::MONTEE_AVEC_LANCER.Execute();
-            }
-
-            break;
-        };
-
-        case States::DECENTE_AVEC_LANCEUR_STATE_ID :
-        {
-            States::DECENTE_AVEC_LANCER.Update();
-            if (States::DECENTE_AVEC_LANCER.IsActive())
-            {
-                States::DECENTE_AVEC_LANCER.Execute();
-            }
-
-            break;
-        };
-
-
-        case States::VIRAGE_ENTREE_ZONE_LANCEMENT_STATE_ID :
-        {
-            States::VIRAGE_ENTREE_ZONE_LANCEMENT.Update();
-            if (States::VIRAGE_ENTREE_ZONE_LANCEMENT.IsActive())
-            {
-                States::VIRAGE_ENTREE_ZONE_LANCEMENT.Execute();
-            }
-
-            break;
-        };
-
-        case States::ALIGNEMENT_REEDSWITCH_ZONE_LANCEMENT_STATE_ID :
-        {
-            States::ALIGNEMENT_REEDSWITCH_ZONE_LANCEMENT.Update();
-            if (States::ALIGNEMENT_REEDSWITCH_ZONE_LANCEMENT.IsActive())
-            {
-                States::ALIGNEMENT_REEDSWITCH_ZONE_LANCEMENT.Execute();
-            }
-
-            break;
-        };
-
-        case States::DEPLOIEMENT_CANON_STATE_ID :
-        {
-            States::DEPLOIEMENT_CANON.Update();
-            if (States::DEPLOIEMENT_CANON.IsActive())
-            {
-                States::DEPLOIEMENT_CANON.Execute();
-            }
-
-            break;
-        };
-
-        case States::DEPLOIEMENT_LIMITSWITCHS_STATE_ID :
-        {
-            States::DEPLOIEMENT_LIMITSWITCHS.Update();
-            if (States::DEPLOIEMENT_LIMITSWITCHS.IsActive())
-            {
-                States::DEPLOIEMENT_LIMITSWITCHS.Execute();
-            }
-
-            break;
-        };
-
-        case States::VERIFICATION_DECLENCHEMENT_LIMITSWITCHS_STATE_ID :
-        {
-            States::VERIFICATION_DECLENCHEMENT_LIMITSWITCHS.Update();
-            if (States::VERIFICATION_DECLENCHEMENT_LIMITSWITCHS.IsActive())
-            {
-                States::VERIFICATION_DECLENCHEMENT_LIMITSWITCHS.Execute();
-            }
-
-            break;
-        };
-
-        case States::SEQUENCE_CALCUL_ROTATION_CIBLE_STATE_ID :
-        {
-            States::SEQUENCE_CALCUL_ROTATION_CIBLE.Update();
-            if (States::SEQUENCE_CALCUL_ROTATION_CIBLE.IsActive())
-            {
-                States::SEQUENCE_CALCUL_ROTATION_CIBLE.Execute();
-            }
-
-            break;
-        };
-
-        case States::SEQUENCE_LANCEMENT_POCHES_STATE_ID:
-        {
-            States::SEQUENCE_LANCEMENT_POCHES.Update();
-            if (States::SEQUENCE_LANCEMENT_POCHES.IsActive())
-            {
-                States::SEQUENCE_LANCEMENT_POCHES.Execute();
-            }
-
-            break;
-        };
-
-
-        case States::SEPARATION_LANCEUR_STATE_ID :
-        {
-            States::SEPARATION_LANCEUR.Update();
-            if (States::SEPARATION_LANCEUR.IsActive())
-            {
-                States::SEPARATION_LANCEUR.Execute();
-            }
-
-            break;
-        };
-
-        case States::VIRAGE_SORTIE_ZONE_LANCEMENT_STATE_ID :
-        {
-            States::VIRAGE_SORTIE_ZONE_LANCEMENT.Update();
-            if (States::VIRAGE_SORTIE_ZONE_LANCEMENT.IsActive())
-            {
-                States::VIRAGE_SORTIE_ZONE_LANCEMENT.Execute();
-            }
-
-            break;
-        };
-
-
-        case States::PARCOURS_SANS_LANCEUR_STATE_ID :
-        {
-            States::PARCOURS_SANS_LANCEUR.Update();
-            if (States::PARCOURS_SANS_LANCEUR.IsActive())
-            {
-                States::PARCOURS_SANS_LANCEUR.Execute();
-            }
-
-            break;
-        };
-
-        case States::MONTEE_SANS_LANCEUR_STATE_ID :
-        {
-            States::MONTEE_SANS_LANCEUR.Update();
-            if (States::MONTEE_SANS_LANCEUR.IsActive())
-            {
-                States::MONTEE_SANS_LANCEUR.Execute();
-            }
-
-            break;
-        };
-
-        case States::DECENTE_SANS_LANCEUR_STATE_ID :
-        {
-            States::DECENTE_SANS_LANCEUR.Update();
-            if (States::DECENTE_SANS_LANCEUR.IsActive())
-            {
-                States::DECENTE_SANS_LANCEUR.Execute();
-            }
-
-            break;
-        };
-
-        default:
-            break;
-    };
-
-
-
-
+ 
 }
 
 void INB4::showXBeeCommRead(const int &read) {
@@ -530,4 +318,11 @@ void INB4::showXBeeCommRead(const int &read) {
     }
 
     delay(20);
+}
+
+void setup(){ 
+  INB4::setup(); 
+}
+void loop(){ 
+  INB4::loop(); 
 }

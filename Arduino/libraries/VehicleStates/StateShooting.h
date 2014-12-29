@@ -1,3 +1,5 @@
+#ifndef STATESHOOTING_H
+#define STATESHOOTING_H
 #include "Vehicle.h"
 using namespace Vehicle;
 
@@ -97,3 +99,4 @@ namespace Vehicle{
     };
   }
 }
+#endif

@@ -7,6 +7,7 @@ namespace Vehicle{
   //LimitSwitch shooterSwitch(SHOOTER_SWITCH_PIN);
   OpticalSensor shooterSensor(SHOOTER_SENSOR_PIN);
   Servo vehicleServo; // Used to drop the shooter
+  OpticalSensor bottomOpticalSensor(A9);
 
   void Setup(){
     //Init motor before servos (interference)

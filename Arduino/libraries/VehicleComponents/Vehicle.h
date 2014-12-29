@@ -1,6 +1,7 @@
 #ifndef VEHICLE_H
 #define VEHICLE_H
 
+#include <Arduino.h>
 #include <Servo.h>
 #include <Hardware.h>
 #include <Store.h>
@@ -62,6 +63,8 @@ namespace Vehicle{
   //extern LimitSwitch shooterSwitch;
   extern OpticalSensor shooterSensor;
   extern Servo vehicleServo;
+  extern OpticalSensor bottomOpticalSensor;
+
   void Setup();
 
   namespace States{};
