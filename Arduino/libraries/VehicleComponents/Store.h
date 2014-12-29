@@ -10,14 +10,8 @@
 namespace Vehicle{
     struct Store{
     private:
-        const static uint8_t STORE_SERVO_PIN = 6;
-        const static int STORE_SERVO_MIN_MICROS = 600;
-        const static int STORE_SERVO_MAX_MICROS = 2400; 
         unsigned long setupTime;
     public:
-        const static int INITIALIZE_DELAY = 2000;
-        const static int STORE_SERVO_INITIAL_MICROS = 623; //Must be close enough to 600 (above)
-        const static int STORE_SERVO_MICROS_STEP = 27; //For 1/8 rotation
         Servo servo; 
         int servoPosition;
         int bagsCount;
@@ -30,6 +24,9 @@ namespace Vehicle{
         void ServoLoadBag();
         void ServoUnloadBag();
         void ServoMoveBag(); // For testing purposes only.
+
+        bool IsEmpty();
+        bool IsFull();
     };
 
     extern Store store;

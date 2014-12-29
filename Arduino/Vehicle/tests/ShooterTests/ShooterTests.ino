@@ -7,6 +7,8 @@ void setup()
 {
   Serial.begin(9600);
   
+  Vehicle::Setup();
+  
   States::Charging charging;
   Serial.println("Starting Charging.");
   charging.Execute();
