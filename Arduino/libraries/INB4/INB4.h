@@ -56,7 +56,7 @@
 XBeeComm XBEECOMM               = XBeeComm(10, 9, 57600);
 LimitSwitch LIMIT_SWITCH        = LimitSwitch(46);
 
-OpticalSensor OPTICAL_SENSOR            = OpticalSensor(A12);
+OpticalSensor OPTICAL_SENSOR            = OpticalSensor(A9);
 
 void INB4::setup() {
 
