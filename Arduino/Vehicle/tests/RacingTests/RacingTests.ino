@@ -6,6 +6,8 @@
 void setup() 
 {
   Serial.begin(9600);
+  
+  Vehicle::Setup();
 
   States::Racing state;
   Serial.println("Starting Racing.");

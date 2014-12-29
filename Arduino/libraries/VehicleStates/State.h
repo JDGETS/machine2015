@@ -44,7 +44,7 @@ namespace Vehicle
 
       class LinearStateMachine
       {
-        static const int NULL = 0;
+        //static const int NULL = 0;
         int count;
         LinearStateMachineNode* root;
 
