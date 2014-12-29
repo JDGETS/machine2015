@@ -14,13 +14,13 @@ void setup()
   LinearStateMachine machine;
   machine.Add(new ParcoursAvecLanceur());
   machine.Add(new MonteeAvecLanceur());
-  machine.Add(new DecenteAvecLanceur());
-  //machine.Add(new VirageEntreeZoneLancement());
+  machine.Add(new DecenteAvecLanceur());  
+  machine.Add(new VirageEntreeZoneLancement());
   //machine.Add(new AlignmentReedSwitchZoneLancement());
   
   Serial.println("Starting the BumpTests StateMachine.");
   
-  machine.Execute();
+  //machine.Execute();
   
   Serial.println("Finished the BumpTests StateMachine.");
 }

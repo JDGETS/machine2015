@@ -20,12 +20,11 @@ namespace Vehicle{
             ParcoursAvecLanceur() : State() {};
 
             void Execute() {
-                motors.Speed(MOTOR_LEFT, 0.35);
-                motors.Speed(MOTOR_RIGHT, 0.35);
+                motors.Speed(MOTOR_LEFT, 0.40);
+                motors.Speed(MOTOR_RIGHT, 0.40);
+                Serial.println("ParcoursAvecLanceur - Waiting for detect...");
                 bottomOpticalSensor.WaitForDetect();
-                Serial.print("Detected at ");
                 Serial.println(bottomOpticalSensor.AnalogValue());
-                delay(20);
                 End();
             };
         };
@@ -35,16 +34,16 @@ namespace Vehicle{
             MonteeAvecLanceur() : State() {};
 
             void Execute() {
-                motors.Speed(MOTOR_LEFT, 0.35);
-                motors.Speed(MOTOR_RIGHT, 0.35);
+                motors.Speed(MOTOR_LEFT, 0.50);
+                motors.Speed(MOTOR_RIGHT, 0.50);
+                delay(1000);
+                Serial.println("MonteeAvecLanceur - Waiting for undetect...");
                 bottomOpticalSensor.WaitForUndetect();
-                Serial.print("unDetected at ");
                 Serial.println(bottomOpticalSensor.AnalogValue());
-                delay(20);
+                delay(200);
+                Serial.println("MonteeAvecLanceur - Waiting for detect...");
                 bottomOpticalSensor.WaitForDetect();
-                Serial.print("Detected at ");
                 Serial.println(bottomOpticalSensor.AnalogValue());
-                delay(20);
                 End();
             };
         };
@@ -55,20 +54,26 @@ namespace Vehicle{
 
             void Execute()
             {
-                motors.Speed(MOTOR_LEFT, -0.20);
-                motors.Speed(MOTOR_RIGHT, -0.20);
+                motors.Speed(MOTOR_LEFT, -0.12);
+                motors.Speed(MOTOR_RIGHT, -0.12);
+                delay(200);
+                Serial.print("DecenteAvecLanceur - Waiting for undetect... ");
                 bottomOpticalSensor.WaitForUndetect();
-                delay(20);
-                End();
+                Serial.println(bottomOpticalSensor.AnalogValue());
                 motors.Speed(MOTOR_LEFT, 0);
                 motors.Speed(MOTOR_RIGHT, 0);
+                delay(1000);
+                motors.Speed(MOTOR_LEFT, -0.20);
+                motors.Speed(MOTOR_RIGHT, -0.20);
+                Serial.print("DecenteAvecLanceur - Waiting for detect... ");
+                bottomOpticalSensor.WaitForDetect();
+                Serial.println(bottomOpticalSensor.AnalogValue());
+                motors.Speed(MOTOR_LEFT, 0);
+                motors.Speed(MOTOR_RIGHT, 0);
+                End();
             };
         };
-    }
-
-
-    namespace States {
-
+    
         class VirageEntreeZoneLancement : public State {
         public:
             VirageEntreeZoneLancement() : State(), firstPass(true),
@@ -83,7 +88,17 @@ namespace Vehicle{
             };
 
             void Execute()
-            {
+            {   
+                static bool firstExecute = true;
+                static bool turnTriggered = false;
+                static unsigned long turnTime = 0;
+                motors.Speed(MOTOR_LEFT, 0.50);
+                motors.Speed(MOTOR_RIGHT, -0.10);
+                delay(1000);
+                motors.Speed(MOTOR_LEFT, 0);
+                motors.Speed(MOTOR_RIGHT, 0);
+                End();return;
+
                 static bool firstExecute = true;
                 static bool turnTriggered = false;
                 static unsigned long turnTime = 0;
@@ -174,10 +189,6 @@ namespace Vehicle{
         class AlignmentReedSwitchZoneLancement : public State{
         public:
             AlignmentReedSwitchZoneLancement() : State(){};
-
-            void Update() {
-
-            };
 
             void Execute() {
                 motors.Speed(MOTOR_LEFT, 0.00);

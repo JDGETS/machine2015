@@ -11,11 +11,16 @@ void OpticalSensor::Setup()
   pinMode(ANALOG_VO_PIN, INPUT);
 };
 
-const float & OpticalSensor::ReadInput()
+float & OpticalSensor::ReadInput()
 {
   _AnalogValue = analogRead(ANALOG_VO_PIN) * (5.0 / 1023.0);
+
   if(_Inverted)
     _AnalogValue = 5 - _AnalogValue;
+
+  if(_AnalogValue == 0 && IGNORE_ZEROS)
+    return _AnalogValue; // Don't change _AnalogValue;
+
   _Detected = (_AnalogValue < MIN_TRIGGER_VALUE );
 
   return _AnalogValue;
@@ -31,7 +36,7 @@ const bool OpticalSensor::IsDetected() const
   return _Detected;
 };
 
-const bool OpticalSensor::LongReadInput(bool ifUnsure)
+bool OpticalSensor::LongReadInput(bool ifUnsure)
 {
     unsigned long delay = LONG_READ_TIME;
     unsigned long start = micros();
@@ -42,7 +47,6 @@ const bool OpticalSensor::LongReadInput(bool ifUnsure)
         count++;
         ReadInput();
         total += (int)(IsDetected());
-        delayMicroseconds(20);
 
         if(micros() - start > delay)
         {
@@ -71,7 +75,7 @@ void OpticalSensor::ResetDebouncing()
   lastStatusChange = 0;
 }
 
-void OpticalSensor::WaitForDetect(bool useLongRead)
+void OpticalSensor::WaitForDetect()
 {
   while(millis() < lastStatusChange + DEBOUNCE_TIME); //Debounce
   if(useLongRead)
@@ -81,7 +85,7 @@ void OpticalSensor::WaitForDetect(bool useLongRead)
   lastStatusChange = millis();
 }
 
-void OpticalSensor::WaitForUndetect(bool useLongRead)
+void OpticalSensor::WaitForUndetect()
 {
   while(millis() < lastStatusChange + DEBOUNCE_TIME); //Debounce
   if(useLongRead)
