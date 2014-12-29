@@ -17,87 +17,52 @@ namespace Vehicle{
 
         class ParcoursAvecLanceur : public State {
         public:
-            ParcoursAvecLanceur() : State(), firstpass(true) {};
-
-            void Update() {
-
-                if (firstpass)
-                {
-                    time = millis();
-                    firstpass = false;
-                }
-
-                if (bottomOpticalSensor.LongReadInput(false))
-                {
-                    End();
-                    delay(20);
-                }
-            };
+            ParcoursAvecLanceur() : State() {};
 
             void Execute() {
                 motors.Speed(MOTOR_LEFT, 0.35);
                 motors.Speed(MOTOR_RIGHT, 0.35);
+                bottomOpticalSensor.WaitForDetect();
+                Serial.print("Detected at ");
+                Serial.println(bottomOpticalSensor.AnalogValue());
+                delay(20);
+                End();
             };
-
-        private:
-            bool firstpass;
-            unsigned long time;
         };
 
         class MonteeAvecLanceur : public State {
         public:
-            MonteeAvecLanceur() : State(), sommetDosDane(false), _FirstExecuteTime(0) {};
-
-            void Update() {
-
-                /*
-                        27 DEC 00:35 -> le char rentre dans la pente et change d'etat (le vehicule stop) presque immidiatement apr;es
-                 */
-
-
-                if (!bottomOpticalSensor.LongReadInput(true))
-                {
-                    sommetDosDane = true;
-                }
-                else if (bottomOpticalSensor.LongReadInput(false) && sommetDosDane)
-                {
-                    End();
-                    delay(20);
-                }
-            };
+            MonteeAvecLanceur() : State() {};
 
             void Execute() {
                 motors.Speed(MOTOR_LEFT, 0.35);
                 motors.Speed(MOTOR_RIGHT, 0.35);
+                bottomOpticalSensor.WaitForUndetect();
+                Serial.print("unDetected at ");
+                Serial.println(bottomOpticalSensor.AnalogValue());
+                delay(20);
+                bottomOpticalSensor.WaitForDetect();
+                Serial.print("Detected at ");
+                Serial.println(bottomOpticalSensor.AnalogValue());
+                delay(20);
+                End();
             };
-
-        private:
-            unsigned long _FirstExecuteTime;
-            bool active;
-            bool sommetDosDane;
         };
 
         class DecenteAvecLanceur : public State {
         public:
-            DecenteAvecLanceur() : State(), _FirstExecuteTime(0) {};
-
-            void Update()
-            {
-                if (!bottomOpticalSensor.LongReadInput(true))
-                {
-                    End();
-                    delay(20);
-                }
-            };
+            DecenteAvecLanceur() : State() {};
 
             void Execute()
             {
-                motors.Speed(MOTOR_LEFT, -0.34);
-                motors.Speed(MOTOR_RIGHT, -0.34);
+                motors.Speed(MOTOR_LEFT, -0.20);
+                motors.Speed(MOTOR_RIGHT, -0.20);
+                bottomOpticalSensor.WaitForUndetect();
+                delay(20);
+                End();
+                motors.Speed(MOTOR_LEFT, 0);
+                motors.Speed(MOTOR_RIGHT, 0);
             };
-
-        private:
-            unsigned long _FirstExecuteTime;
         };
     }
 

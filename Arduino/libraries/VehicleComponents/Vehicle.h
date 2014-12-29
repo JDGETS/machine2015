@@ -25,6 +25,9 @@
 #define STORE_SERVO_MIN_MICROS      600
 #define STORE_SERVO_MAX_MICROS      2400 
 
+// Vehicle
+#define VEHICLE_SENSOR_MIN_VALUE    2.8
+
 // Store
 #define STORE_SERVO_INITIAL_MICROS  620   // Must be close enough to 600 (STORE_SERVO_MIN_MICROS)
 #define STORE_INITIALIZE_DELAY      3500  // Time to reinitialize the store to STORE_SERVO_INITIAL_MICROS

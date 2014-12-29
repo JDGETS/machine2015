@@ -16,13 +16,15 @@ namespace Vehicle{
 
     motors.Setup();
 
+    bottomOpticalSensor.SetMinTriggerValue(VEHICLE_SENSOR_MIN_VALUE);
+    bottomOpticalSensor.Invert();
+
     store.Setup();
 
     storeBagInSwitch.Setup();
     //shooterSwitch.Setup();
     shooterSensor.Setup();
     shooterSensor.SetDebounceTime(SHOOTER_SENSOR_DEBOUNCE_TIME);
-    shooterSensor.Invert();
 
     //Configure the right values first.
     //vehicleServo.writeMicroseconds(VEHICLE_SERVO_INITIAL_MICROS);

@@ -1,17 +1,24 @@
 #include "OpticalSensor.h"
 
-OpticalSensor sensor(A9);
+#define SENSOR_PIN A2
+
+OpticalSensor sensor(SENSOR_PIN);
 
 void setup() 
 {
   Serial.begin(9600);
   
   Serial.println("Setting up the optical sensor...");
+  //pinMode(SENSOR_PIN, INPUT);
   sensor.Setup();
 }
  
 void loop() 
 {
-  Serial.println(sensor.ReadInput());
+  Serial.print(analogRead(SENSOR_PIN));
+  Serial.print(" ");
+  Serial.print(sensor.ReadInput());
+  Serial.println("")
+  delay(100);
 } 
 
