@@ -15,8 +15,8 @@ void setup()
   machine.Add(new ParcoursAvecLanceur());
   machine.Add(new MonteeAvecLanceur());
   machine.Add(new DecenteAvecLanceur());
-  machine.Add(new VirageEntreeZoneLancement());
-  machine.Add(new AlignmentReedSwitchZoneLancement());
+  //machine.Add(new VirageEntreeZoneLancement());
+  //machine.Add(new AlignmentReedSwitchZoneLancement());
   
   Serial.println("Starting the BumpTests StateMachine.");
   
