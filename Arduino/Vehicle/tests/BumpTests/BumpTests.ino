@@ -20,7 +20,7 @@ void setup()
   
   Serial.println("Starting the BumpTests StateMachine.");
   
-  //machine.Execute();
+  machine.Execute();
   
   Serial.println("Finished the BumpTests StateMachine.");
 }

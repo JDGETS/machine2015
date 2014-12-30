@@ -36,7 +36,7 @@ namespace Vehicle{
             void Execute() {
                 motors.Speed(MOTOR_LEFT, 0.50);
                 motors.Speed(MOTOR_RIGHT, 0.50);
-                delay(1000);
+                delay(200);
                 Serial.println("MonteeAvecLanceur - Waiting for undetect...");
                 bottomOpticalSensor.WaitForUndetect();
                 Serial.println(bottomOpticalSensor.AnalogValue());
@@ -54,8 +54,8 @@ namespace Vehicle{
 
             void Execute()
             {
-                motors.Speed(MOTOR_LEFT, -0.12);
-                motors.Speed(MOTOR_RIGHT, -0.12);
+                motors.Speed(MOTOR_LEFT, -0.20);
+                motors.Speed(MOTOR_RIGHT, -0.20);
                 delay(200);
                 Serial.print("DecenteAvecLanceur - Waiting for undetect... ");
                 bottomOpticalSensor.WaitForUndetect();
@@ -63,13 +63,15 @@ namespace Vehicle{
                 motors.Speed(MOTOR_LEFT, 0);
                 motors.Speed(MOTOR_RIGHT, 0);
                 delay(1000);
-                motors.Speed(MOTOR_LEFT, -0.20);
-                motors.Speed(MOTOR_RIGHT, -0.20);
+                motors.Speed(MOTOR_LEFT, -0.33);
+                motors.Speed(MOTOR_RIGHT, -0.33);
+                delay(500);
                 Serial.print("DecenteAvecLanceur - Waiting for detect... ");
                 bottomOpticalSensor.WaitForDetect();
                 Serial.println(bottomOpticalSensor.AnalogValue());
                 motors.Speed(MOTOR_LEFT, 0);
                 motors.Speed(MOTOR_RIGHT, 0);
+
                 End();
             };
         };
@@ -89,19 +91,52 @@ namespace Vehicle{
 
             void Execute()
             {   
-                static bool firstExecute = true;
-                static bool turnTriggered = false;
-                static unsigned long turnTime = 0;
-                motors.Speed(MOTOR_LEFT, 0.50);
-                motors.Speed(MOTOR_RIGHT, -0.10);
-                delay(1000);
-                motors.Speed(MOTOR_LEFT, 0);
-                motors.Speed(MOTOR_RIGHT, 0);
-                End();return;
+                //static bool firstExecute = true;
+                //static bool turnTriggered = false;
+                //static unsigned long turnTime = 0;
 
-                static bool firstExecute = true;
-                static bool turnTriggered = false;
-                static unsigned long turnTime = 0;
+                //motors.Speed(MOTOR_LEFT, 0.50);
+                //motors.Speed(MOTOR_RIGHT, -0.10);
+                //delay(1000);
+                //motors.Speed(MOTOR_LEFT, 0);
+                //motors.Speed(MOTOR_RIGHT, 0);
+
+                static const unsigned long startTime        = millis();
+                static const unsigned int nbStep            = 4;
+
+                static const float leftSpeeds[nbStep]       = {
+                       // 0.25,
+                        -0.25,
+                        0.25,
+
+                        0.0
+                };
+
+
+                static const float rightSpeeds[nbStep]      = {
+                        //0.25,
+                        0.45,
+                        0.45,
+
+                        0.0
+                };
+
+                static const unsigned long timing[nbStep]   = {
+                        //200,
+                        1900,
+                        3100,
+
+                        3102
+                };
+
+
+                motors.RunSpeedScript(nbStep, leftSpeeds, rightSpeeds, timing, startTime);
+
+                //End();
+
+
+                return;
+
 
                 /*
                         26 DEC - 23:57 -> la roue de droite a pogner le rebors alors certain event non pas peut faire se qu'il devait faire a cause de ca ex: reculer avec la roue de droit
@@ -109,6 +144,7 @@ namespace Vehicle{
                         27 DEC - 00:09 -> la roue de gauche a pogner le rebors alors certain event non pas pu faire se qu'il devait faire
                  */
 
+                /*
 
                 static const unsigned long startTime        = millis();
                 static const unsigned int nbStep            = 7;
@@ -132,6 +168,8 @@ namespace Vehicle{
                         5500, 6500,
                         6501
                 };
+                */
+
             /*
                 static const unsigned long startTime        = millis();
                 static const unsigned int nbStep            = 19;
