@@ -34,7 +34,6 @@ public:
     const bool IsTopReedSwitchActive();
     const bool IsInRange();
 
-private:
     ReedSwitch _TopReedSwitch, _BottomReedSwitch;
 };
 

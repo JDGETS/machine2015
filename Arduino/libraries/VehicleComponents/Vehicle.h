@@ -21,10 +21,10 @@
 #define RIGHT_MOTOR_PIN_OUT MotorPinOut(A5, A4, 12, A3)
 
 // Reedswitches configuration // Use MotorPinOut defined in Motors.cpp
-#define REEDSWITCH_1 PairedReedSwitch(1, 2)
-#define REEDSWITCH_2 PairedReedSwitch(1, 2)
-#define REEDSWITCH_3 PairedReedSwitch(1, 2)
-#define REEDSWITCH_4 PairedReedSwitch(1, 2)
+#define REEDSWITCH_1 PairedReedSwitch(36, 38)
+#define REEDSWITCH_2 PairedReedSwitch(32, 34)
+#define REEDSWITCH_3 PairedReedSwitch(28, 30)
+#define REEDSWITCH_4 PairedReedSwitch(26, 24)
 
 // Servo configuration
 #define VEHICLE_SERVO_MIN_MICROS    600

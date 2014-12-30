@@ -13,9 +13,16 @@ void setup()
  
 void loop() 
 {
+  Serial.print(reedswitches.GetValue(), BIN);
+  Serial.print(" (target=");
   Serial.print(States::AlignmentReedSwitchZoneLancement::TARGET, BIN);
-  Serial.print(" ");
-  Serial.println(reedswitches.GetValue(), BIN);
+  Serial.print(", ");
+  for(int i = 0; i < 4; i++){
+    Serial.print(reedswitches.ARRAY[i]._TopReedSwitch.IsActive());
+    Serial.print(reedswitches.ARRAY[i]._BottomReedSwitch.IsActive());
+    Serial.print(", ");
+  }
+  Serial.println(")");
   delay(50);
 } 
 
