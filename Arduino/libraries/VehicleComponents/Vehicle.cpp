@@ -6,8 +6,11 @@ namespace Vehicle{
   OpticalSensor bottomOpticalSensor(VEHICLE_SENSOR_PIN);
   Vehicle::Store store;
   LimitSwitch storeBagInSwitch(STORE_DETECT_BAG_SWITCH_PIN);
-  //LimitSwitch shooterSwitch(SHOOTER_SWITCH_PIN);
-  OpticalSensor shooterSensor(SHOOTER_SENSOR_PIN);
+  #ifdef SHOOTER_USE_ULTRASONIC
+  UltrasonicSensor shooterSensor(SHOOTER_US_SENSOR_TRIGGER_PIN, SHOOTER_US_SENSOR_ECHO_PIN, SHOOTER_US_SENSOR_TRIGGER_PIN);
+  #else
+  OpticalSensor shooterSensor(SHOOTER_OPTICAL_SENSOR_PIN);
+  #endif
   Servo vehicleServo; // Used to drop the shooter
 
   void Setup(){
@@ -25,10 +28,11 @@ namespace Vehicle{
     store.Setup();
 
     storeBagInSwitch.Setup();
-    //shooterSwitch.Setup();
-    shooterSensor.Setup();
     shooterSensor.SetDebounceTime(SHOOTER_SENSOR_DEBOUNCE_TIME);
+    shooterSensor.Setup();
+    #ifndef SHOOTER_OPTICAL_SENSOR_PIN
     shooterSensor.SetUseLongRead(true);
+    #endif
 
     reedswitches.Setup();
 

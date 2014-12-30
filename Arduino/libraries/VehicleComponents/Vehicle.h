@@ -8,13 +8,14 @@
 #include <State.h>
 
 // Pins
-#define VEHICLE_SERVO_PIN           6
-#define VEHICLE_SENSOR_PIN          A9
-#define STORE_SERVO_PIN             5
-#define STORE_DETECT_BAG_SWITCH_PIN 22
-//#define SHOOTER_SWITCH_PIN        38
-#define SHOOTER_SENSOR_PIN          A8 
-#define SHOOTER_MOTOR_MOSFET        7
+#define VEHICLE_SERVO_PIN             6
+#define VEHICLE_SENSOR_PIN            A9
+#define STORE_SERVO_PIN               5
+#define STORE_DETECT_BAG_SWITCH_PIN   22
+#define SHOOTER_OPTICAL_SENSOR_PIN    A8 
+#define SHOOTER_US_SENSOR_TRIGGER_PIN 1
+#define SHOOTER_US_SENSOR_ECHO_PIN    1
+#define SHOOTER_MOTOR_MOSFET          7
 
 // Motors configuration // Use MotorPinOut defined in Motors.cpp
 #define LEFT_MOTOR_PIN_OUT MotorPinOut(A0, A1, 11, A2)
@@ -52,10 +53,19 @@
 #define CHARGING_DONE_DELAY             1000  // Delay after the vehicle is done chargint before transitioning into the next state.
 
 // Shooter constants
+#define SHOOTER_USE_ULTRASONIC // Comment this out to use the OpticalSensor
+#ifdef SHOOTER_USE_ULTRASONIC // Ultrasonic
+#define SHOOTER_US_SENSOR_MAX_DISTANCE  50
 #define SHOOTER_SENSOR_DEBOUNCE_TIME    100
 #define SHOOTER_MOTOR_REQUIRED_TIME     700   // Time required to power the motor
 #define SHOOTER_LOAD_AND_SHOOT_DELAY    100   // Time it takes to charge and shoot the bag and time until it reaches the hole (millis)
                                               // If it cuts too late, no big deal, the elastic will bring it back to initial position
+#else // Optical
+#define SHOOTER_SENSOR_DEBOUNCE_TIME    100
+#define SHOOTER_MOTOR_REQUIRED_TIME     700   // Time required to power the motor
+#define SHOOTER_LOAD_AND_SHOOT_DELAY    100   // Time it takes to charge and shoot the bag and time until it reaches the hole (millis)
+                                              // If it cuts too late, no big deal, the elastic will bring it back to initial position
+#endif
 #define SHOOTER_BAG_FREE_FALL_DELAY     500   // Time for the bag to fall into place. Put some padding in there.
 #define SHOOTER_MOTOR_RDY_TO_RECV_DELAY 1000  // Delay to be sure the system is ready to receive the new bag (for the elastic to bring the launcher back to initial position). Is used after the motor has been shut down and unloading the new one.
 
@@ -72,8 +82,11 @@ namespace Vehicle{
   extern Motors motors;
   extern Vehicle::Store store;
   extern LimitSwitch storeBagInSwitch;
-  //extern LimitSwitch shooterSwitch;
+  #ifdef SHOOTER_USE_ULTRASONIC
+  extern UltrasonicSensor shooterSensor;
+  #else
   extern OpticalSensor shooterSensor;
+  #endif
   extern Servo vehicleServo;
   extern OpticalSensor bottomOpticalSensor;
   extern VehicleReedSwitches reedswitches;

@@ -70,10 +70,8 @@ namespace Vehicle{
 
       void ReadDataHole(Hole *hole){
         shooterSensor.WaitForUndetect();
-        Serial.println("DANS LE VIDE!");
         hole->beginning = millis();
         shooterSensor.WaitForDetect();
-        Serial.println("JE VOIS TON CUL");
         hole->end = millis();
         hole->time = hole->end - hole->beginning;
       }

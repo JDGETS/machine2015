@@ -14,10 +14,9 @@ void UltrasonicSensor::Setup()
 
 float & UltrasonicSensor::ReadInput()
 {
-  //if(lastRead < Min_delay_between ping)
-    _DistanceValue = sonar.ping() / US_ROUNDTRIP_CM;
+  _DistanceValue = sonar.ping() / US_ROUNDTRIP_CM;
 
-  _Detected = (_DistanceValue < MIN_TRIGGER_VALUE );
+  _Detected = (_DistanceValue < MIN_TRIGGER_VALUE && _DistanceValue != 0 );
 
   return _DistanceValue;
 }
