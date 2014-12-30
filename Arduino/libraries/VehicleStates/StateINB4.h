@@ -112,32 +112,43 @@ namespace Vehicle{
 
             void Execute() {
                 unsigned long value = reedswitches.GetValue();
-                float lastSpeed = 0;
-                float speed = 0;
-                float MIN_SPEED = 0.30;
+                unsigned long impulsion_time = 100;
+                unsigned long lastTargetCheck = millis() - impulsion_time - 1;
+                float MIN_SPEED = 0.25;
+                float speed = MIN_SPEED;
+                float lastSpeed = speed;
+                Serial.println("starting");
                 while(value != TARGET){
-                    //This loop will position the vehicle, step by step (w/ impulsions).
-                    motors.Speed(MOTOR_LEFT, 0);
-                    motors.Speed(MOTOR_RIGHT, 0);
-                    if(value == 0){
-                        //We lost the signal, let's continue what we were doing.
-                        speed = lastSpeed;
-                    }
-                    else if(value > TARGET){
-                        speed = - MIN_SPEED;
-                    }
-                    else if(value < TARGET){
-                        speed = + MIN_SPEED;
-                    }
-                    else{
-                        speed = 0;
-                    }
+                    if(impulsion_time < millis()-lastTargetCheck){
+                        Serial.print("not target ");
+                        Serial.println(value, BIN);
+                        //This loop will position the vehicle, step by step (w/ impulsions).
+                        motors.Speed(MOTOR_LEFT, 0);
+                        motors.Speed(MOTOR_RIGHT, 0);
+                        if(value == 0){
+                            //We lost the signal, let's continue what we were doing.
+                            speed = lastSpeed;
+                        }
+                        else if(value > TARGET){
+                            speed = - MIN_SPEED;
+                        }
+                        else if(value < TARGET){
+                            speed = + MIN_SPEED;
+                        }
+                        else{
+                            speed = 0;
+                        }
 
-                    motors.Speed(MOTOR_LEFT, speed);
-                    motors.Speed(MOTOR_RIGHT, speed);
-                    delay(100);
-                    lastSpeed = speed;
+                        delay(100);
+                        motors.Speed(MOTOR_LEFT, speed);
+                        motors.Speed(MOTOR_RIGHT, speed);
+                        lastTargetCheck = millis();
+                        lastSpeed = speed;
+                    }
+                    value = reedswitches.GetValue();
                 }
+                motors.Speed(MOTOR_LEFT, 0);
+                motors.Speed(MOTOR_RIGHT, 0);
 
                 End();
             };
