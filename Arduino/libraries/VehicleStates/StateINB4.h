@@ -191,8 +191,33 @@ namespace Vehicle{
             AlignmentReedSwitchZoneLancement() : State(){};
 
             void Execute() {
-                motors.Speed(MOTOR_LEFT, 0.00);
-                motors.Speed(MOTOR_RIGHT, 0.00);
+                unsigned long target = 0b0010;
+                unsigned long value = reedswitches.GetValue();
+                float speed = 0;
+                float MIN_SPEED = 0.30;
+                while(value != target){
+                    //This loop will position the vehicle, step by step (w/ impulsions).
+                    motors.Speed(MOTOR_LEFT, 0);
+                    motors.Speed(MOTOR_RIGHT, 0);
+                    if(value == 0){
+                        //We lost the signal, let's continue what we were doing.
+                    }
+                    else if(value > target){
+                        speed = - MIN_SPEED;
+                    }
+                    else if(value < target){
+                        speed = + MIN_SPEED;
+                    }
+                    else{
+                        speed = 0;
+                    }
+
+                    motors.Speed(MOTOR_LEFT, speed);
+                    motors.Speed(MOTOR_RIGHT, speed);
+                    delay(100);
+                }
+
+                End();
             };
 
         };
