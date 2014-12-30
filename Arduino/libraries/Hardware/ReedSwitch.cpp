@@ -71,7 +71,7 @@ void VehicleReedSwitches::Setup()
     ARRAY[3].Setup();
 };
 
-unsigned int VehicleReedSwitches::BinValue()
+unsigned int VehicleReedSwitches::GetValue()
 {
     int value = 0;
     for(int i = 0; i < 4; i++)

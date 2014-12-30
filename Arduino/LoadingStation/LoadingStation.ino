@@ -38,6 +38,7 @@ void setup() {
 }
 
 void loop(){  
+  return
   // La porte est ouverte
   if ( ! doorSwitch.ReadInput() )
   {

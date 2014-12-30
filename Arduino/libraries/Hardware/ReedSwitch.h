@@ -48,7 +48,7 @@ public:
             PairedReedSwitch indexTwo, PairedReedSwitch indexThree);
 
     void Setup();
-    unsigned int BinValue();
+    unsigned int GetValue();
 };
 
 #endif // REED_SWITCH_H

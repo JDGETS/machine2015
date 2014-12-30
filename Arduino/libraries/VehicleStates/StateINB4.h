@@ -95,6 +95,7 @@ namespace Vehicle{
 
                 if (reedswitches.GetValue() != 0) 
                 {
+                    Serial.print("VirageEntreeZoneLancement - Detected Reedswitch. Ending state.");
                     End();
                 }
 
@@ -105,15 +106,16 @@ namespace Vehicle{
 
         class AlignmentReedSwitchZoneLancement : public State{
         public:
+            const static unsigned long TARGET = 0b0100;
+
             AlignmentReedSwitchZoneLancement() : State(){};
 
             void Execute() {
-                unsigned long target = 0b0100;
                 unsigned long value = reedswitches.GetValue();
                 float lastSpeed = 0;
                 float speed = 0;
                 float MIN_SPEED = 0.30;
-                while(value != target){
+                while(value != TARGET){
                     //This loop will position the vehicle, step by step (w/ impulsions).
                     motors.Speed(MOTOR_LEFT, 0);
                     motors.Speed(MOTOR_RIGHT, 0);
@@ -121,10 +123,10 @@ namespace Vehicle{
                         //We lost the signal, let's continue what we were doing.
                         speed = lastSpeed;
                     }
-                    else if(value > target){
+                    else if(value > TARGET){
                         speed = - MIN_SPEED;
                     }
-                    else if(value < target){
+                    else if(value < TARGET){
                         speed = + MIN_SPEED;
                     }
                     else{
