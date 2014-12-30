@@ -36,7 +36,7 @@
 #define VEHICLE_SENSOR_MIN_VALUE    0.15
 
 // Store
-#define STORE_SERVO_INITIAL_MICROS  613   // Must be close enough to 600 (STORE_SERVO_MIN_MICROS) - Is sometimes 613 or 620
+#define STORE_SERVO_INITIAL_MICROS  629   // Must be close enough to 600 (STORE_SERVO_MIN_MICROS) - Is sometimes 613 or 620
 #define STORE_INITIALIZE_DELAY      3500  // Time to reinitialize the store to STORE_SERVO_INITIAL_MICROS
 #define STORE_SERVO_MICROS_STEP     27    // For 1/8 rotation
 #define STORE_MAX_NUMBER_OF_BAGS    8
@@ -49,6 +49,7 @@
 
 // Charging
 #define CHARGING_SWITCH_TO_STORE_DELAY  400   // Time it takes to charge and shoot the bag and time until it reaches the hole (millis)
+#define CHARGING_DONE_DELAY             1000  // Delay after the vehicle is done chargint before transitioning into the next state.
 
 // Shooter constants
 #define SHOOTER_SENSOR_DEBOUNCE_TIME    100

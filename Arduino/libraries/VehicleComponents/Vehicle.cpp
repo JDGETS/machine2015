@@ -28,6 +28,7 @@ namespace Vehicle{
     //shooterSwitch.Setup();
     shooterSensor.Setup();
     shooterSensor.SetDebounceTime(SHOOTER_SENSOR_DEBOUNCE_TIME);
+    shooterSensor.SetUseLongRead(true);
 
     reedswitches.Setup();
 

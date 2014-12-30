@@ -21,6 +21,7 @@ namespace Vehicle{
           Serial.println("Loaded a bag!");
           store.ServoLoadBag();
         }
+        delay(CHARGING_DONE_DELAY); 
         Serial.println("We are done with Charging.");
         End(); 
         return;

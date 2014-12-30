@@ -1,6 +1,6 @@
 #include "OpticalSensor.h"
 
-#define SENSOR_PIN A9
+#define SENSOR_PIN A8
 
 OpticalSensor sensor(SENSOR_PIN);
 
