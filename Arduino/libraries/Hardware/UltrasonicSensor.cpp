@@ -39,13 +39,15 @@ void UltrasonicSensor::ResetDebouncing()
 void UltrasonicSensor::WaitForDetect()
 {
   while(millis() < lastStatusChange + DEBOUNCE_TIME); //Debounce
-  while(!IsDetected()) ReadInput();
+  ReadInput();
+  while(!IsDetected()){ delay(WAIT_READ_DELAY); ReadInput(); }
   lastStatusChange = millis();
 }
 
 void UltrasonicSensor::WaitForUndetect()
 {
   while(millis() < lastStatusChange + DEBOUNCE_TIME); //Debounce
-  while(IsDetected()) ReadInput();
+  ReadInput();
+  while(IsDetected()){ delay(WAIT_READ_DELAY); ReadInput(); }
   lastStatusChange = millis();
 }

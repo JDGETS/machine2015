@@ -13,8 +13,8 @@
 #define STORE_SERVO_PIN               5
 #define STORE_DETECT_BAG_SWITCH_PIN   22
 #define SHOOTER_OPTICAL_SENSOR_PIN    A8 
-#define SHOOTER_US_SENSOR_TRIGGER_PIN 1
-#define SHOOTER_US_SENSOR_ECHO_PIN    1
+#define SHOOTER_US_SENSOR_TRIGGER_PIN 52
+#define SHOOTER_US_SENSOR_ECHO_PIN    53
 #define SHOOTER_MOTOR_MOSFET          7
 
 // Motors configuration // Use MotorPinOut defined in Motors.cpp
@@ -53,14 +53,18 @@
 #define CHARGING_DONE_DELAY             1000  // Delay after the vehicle is done chargint before transitioning into the next state.
 
 // Shooter constants
+#define SHOOTER_TARGET_MIN_RPM 1
+#define SHOOTER_TARGET_MAX_RPM 2
 #define SHOOTER_USE_ULTRASONIC // Comment this out to use the OpticalSensor
 #ifdef SHOOTER_USE_ULTRASONIC // Ultrasonic
-#define SHOOTER_US_SENSOR_MAX_DISTANCE  50
-#define SHOOTER_SENSOR_DEBOUNCE_TIME    100
+#define SHOOTER_US_SENSOR_MAX_DISTANCE  15
+#define SHOOTER_US_SENSOR_MIN_TRIGGER_VALUE 25
+#define SHOOTER_SENSOR_DEBOUNCE_TIME    300
 #define SHOOTER_MOTOR_REQUIRED_TIME     700   // Time required to power the motor
 #define SHOOTER_LOAD_AND_SHOOT_DELAY    100   // Time it takes to charge and shoot the bag and time until it reaches the hole (millis)
                                               // If it cuts too late, no big deal, the elastic will bring it back to initial position
 #else // Optical
+#define SHOOTER_OPT_SENSOR_MIN_TRIGGER_VALUE 2.0
 #define SHOOTER_SENSOR_DEBOUNCE_TIME    100
 #define SHOOTER_MOTOR_REQUIRED_TIME     700   // Time required to power the motor
 #define SHOOTER_LOAD_AND_SHOOT_DELAY    100   // Time it takes to charge and shoot the bag and time until it reaches the hole (millis)

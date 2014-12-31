@@ -7,7 +7,7 @@ namespace Vehicle{
   Vehicle::Store store;
   LimitSwitch storeBagInSwitch(STORE_DETECT_BAG_SWITCH_PIN);
   #ifdef SHOOTER_USE_ULTRASONIC
-  UltrasonicSensor shooterSensor(SHOOTER_US_SENSOR_TRIGGER_PIN, SHOOTER_US_SENSOR_ECHO_PIN, SHOOTER_US_SENSOR_TRIGGER_PIN);
+  UltrasonicSensor shooterSensor(SHOOTER_US_SENSOR_TRIGGER_PIN, SHOOTER_US_SENSOR_ECHO_PIN, SHOOTER_US_SENSOR_MAX_DISTANCE);
   #else
   OpticalSensor shooterSensor(SHOOTER_OPTICAL_SENSOR_PIN);
   #endif
@@ -30,8 +30,11 @@ namespace Vehicle{
     storeBagInSwitch.Setup();
     shooterSensor.SetDebounceTime(SHOOTER_SENSOR_DEBOUNCE_TIME);
     shooterSensor.Setup();
-    #ifndef SHOOTER_OPTICAL_SENSOR_PIN
-    shooterSensor.SetUseLongRead(true);
+    #ifdef SHOOTER_USE_ULTRASONIC
+    shooterSensor.SetMinTriggerValue(SHOOTER_US_SENSOR_MIN_TRIGGER_VALUE);
+    #else
+    shooterSensor.SetMinTriggerValue(SHOOTER_OPT_SENSOR_MIN_TRIGGER_VALUE);
+    shooterSensor.SetUseLongRead(false);
     #endif
 
     reedswitches.Setup();

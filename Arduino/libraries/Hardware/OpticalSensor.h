@@ -20,7 +20,7 @@ struct OpticalSensor {
             useLongRead(false), 
             LONG_READ_TIME(2500), 
             DEBOUNCE_TIME(100), 
-            MIN_TRIGGER_VALUE(4.80),
+            MIN_TRIGGER_VALUE(2.50),
             IGNORE_ZEROS(false) {};
 
     void Setup();

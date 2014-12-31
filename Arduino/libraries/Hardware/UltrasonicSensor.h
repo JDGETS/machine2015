@@ -33,6 +33,7 @@ struct UltrasonicSensor {
     void SetDebounceTime(unsigned long millis){ DEBOUNCE_TIME = millis; };
 private:
     NewPing sonar;
+    unsigned long WAIT_READ_DELAY = 15;
     float MIN_TRIGGER_VALUE;
     unsigned long DEBOUNCE_TIME;
     float _DistanceValue;

@@ -27,18 +27,13 @@ namespace Vehicle{
         Serial.print("Start time: ");
         unsigned long time = millis();
         Serial.println(time);
-        
-        shooterSensor.ResetDebouncing();
-        shooterSensor.WaitForDetect(); // Switch is pressed, now we can start our sequence
-        Serial.println("Waiting for first hole...");
-        ReadDataHole(&first);
-        Serial.println("Waiting for second hole...");
-        ReadDataHole(&second);
-        
-        delta = second.beginning - first.beginning;
-        nextHoleTime = second.beginning; // It's aligned at the center
-        Serial.print("Delay is: ");
-        Serial.println(delta);
+
+        float rpm = -1;
+        while(rpm < SHOOTER_TARGET_MIN_RPM || rpm > SHOOTER_TARGET_MAX_RPM){
+          if(rpm != -1)
+            Serial.println("Invalid Target RPM, restarting ReadDataHole.");
+          rpm = ReadRPM(&first, &second);
+        }
          
         Serial.print("Current is: ");
         Serial.println(millis());
@@ -68,9 +63,36 @@ namespace Vehicle{
         return;
       } 
 
+      float ReadRPM(Hole *first, Hole *second)
+      {
+        float rpm = 0;
+        Hole third;
+        shooterSensor.WaitForDetect(); // Switch is pressed, now we can start our sequence
+        unsigned long a = millis();
+        Serial.println("Waiting for first hole...");
+        ReadDataHole(first);
+        Serial.println("Waiting for second hole...");
+        ReadDataHole(second);
+        unsigned long b = millis();
+        
+        delta = second->beginning - first->beginning;
+        unsigned long delta2 = second->end - first->end;
+        nextHoleTime = second->beginning; // It's aligned at the center
+
+        rpm = 60.0*1000.0/delta / 2.0; // 2 holes per rotation
+
+        Serial.print("Done reading target data. RPM=");
+        Serial.println(rpm);
+        Serial.print("Delay is: ");
+        Serial.println(delta);
+        return rpm;
+      }
+
       void ReadDataHole(Hole *hole){
+        Serial.println("StateShooting - Wait for undetect");
         shooterSensor.WaitForUndetect();
         hole->beginning = millis();
+        Serial.println("StateShooting - Wait for detect");
         shooterSensor.WaitForDetect();
         hole->end = millis();
         hole->time = hole->end - hole->beginning;

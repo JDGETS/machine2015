@@ -11,7 +11,6 @@ void setup()
   Serial.println("Setting up the optical sensor...");
   //pinMode(SENSOR_PIN, INPUT);
   sensor.Setup();
-  sensor.Invert();
 }
  
 void loop() 

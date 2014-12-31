@@ -47,9 +47,9 @@ bool OpticalSensor::LongReadInput(bool ifUnsure)
         count++;
         ReadInput();
         total += (int)(IsDetected());
-
         if(micros() - start > delay)
         {
+            Serial.println(count);
             if(total == 0)
             {
                 return false;
