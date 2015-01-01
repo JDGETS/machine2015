@@ -17,7 +17,7 @@ void loop()
   Serial.print(" (target=");
   Serial.print(States::AlignmentReedSwitchZoneLancement::TARGET, BIN);
   Serial.print(", ");
-  for(int i = 0; i < 4; i++){
+  for(int i = 3; i >= 0; i--){
     Serial.print(reedswitches.ARRAY[i]._TopReedSwitch.IsActive());
     Serial.print(reedswitches.ARRAY[i]._BottomReedSwitch.IsActive());
     Serial.print(", ");

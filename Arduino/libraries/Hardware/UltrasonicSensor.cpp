@@ -16,7 +16,18 @@ float & UltrasonicSensor::ReadInput()
 {
   _DistanceValue = sonar.ping() / US_ROUNDTRIP_CM;
 
-  _Detected = (_DistanceValue < MIN_TRIGGER_VALUE && _DistanceValue != 0 );
+  bool detected = (_DistanceValue < MIN_TRIGGER_VALUE && _DistanceValue != 0 );
+
+  if(_DistanceValue == 0){
+    consecutiveZeros++;
+    if(consecutiveZeros < CONSECUTIVE_ZEROS_N){
+      return _DistanceValue; //Don't set _Detected
+    }
+  }
+  else
+    consecutiveZeros = 0;
+
+  _Detected = detected;
 
   return _DistanceValue;
 }

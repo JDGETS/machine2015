@@ -18,9 +18,6 @@ float & OpticalSensor::ReadInput()
   if(_Inverted)
     _AnalogValue = 5 - _AnalogValue;
 
-  if(_AnalogValue == 0 && IGNORE_ZEROS)
-    return _AnalogValue; // Don't change _AnalogValue;
-
   _Detected = (_AnalogValue < MIN_TRIGGER_VALUE );
 
   return _AnalogValue;
@@ -49,7 +46,6 @@ bool OpticalSensor::LongReadInput(bool ifUnsure)
         total += (int)(IsDetected());
         if(micros() - start > delay)
         {
-            Serial.println(count);
             if(total == 0)
             {
                 return false;

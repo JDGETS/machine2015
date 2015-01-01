@@ -1,7 +1,7 @@
 #include "UltrasonicSensor.h"
 
-#define TRIGGER_PIN 52
-#define OUTPUT_PIN 53
+#define TRIGGER_PIN 42
+#define OUTPUT_PIN 40
 #define MAX_DISTANCE 15
 
 UltrasonicSensor sensor(TRIGGER_PIN, OUTPUT_PIN, MAX_DISTANCE);

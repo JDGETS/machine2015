@@ -9,7 +9,7 @@ LinearStateMachine* machine = 0;
 
 void LoadStateMachine(){
   machine = new LinearStateMachine();
-  if(true) // If Shooter is detected
+  if(false) // If Shooter is detected
   {
     machine->Add(new Charging());
     machine->Add(new ParcoursAvecLanceur());
@@ -17,7 +17,7 @@ void LoadStateMachine(){
     machine->Add(new DecenteAvecLanceur());  
     machine->Add(new VirageEntreeZoneLancement());
     machine->Add(new AlignmentReedSwitchZoneLancement());
-    machine->Add(new Shooting());
+    machine->Add(new NewShooting());
   }
   else
   {

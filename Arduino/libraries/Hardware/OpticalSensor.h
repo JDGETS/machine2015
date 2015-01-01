@@ -20,8 +20,7 @@ struct OpticalSensor {
             useLongRead(false), 
             LONG_READ_TIME(2500), 
             DEBOUNCE_TIME(100), 
-            MIN_TRIGGER_VALUE(2.50),
-            IGNORE_ZEROS(false) {};
+            MIN_TRIGGER_VALUE(2.50) {};
 
     void Setup();
 
@@ -44,7 +43,6 @@ private:
     float MIN_TRIGGER_VALUE;
     unsigned long LONG_READ_TIME;
     unsigned long DEBOUNCE_TIME;
-    unsigned long IGNORE_ZEROS;
     float _AnalogValue;
     bool _Detected;
     bool _Inverted;

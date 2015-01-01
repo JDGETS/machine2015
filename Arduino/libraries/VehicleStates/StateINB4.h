@@ -23,8 +23,7 @@ namespace Vehicle{
                 motors.Speed(MOTOR_LEFT, 0.40);
                 motors.Speed(MOTOR_RIGHT, 0.40);
                 Serial.println("ParcoursAvecLanceur - Waiting for detect...");
-                bottomOpticalSensor.WaitForDetect();
-                Serial.println(bottomOpticalSensor.AnalogValue());
+                bottomSensor.WaitForDetect();
                 End();
             };
         };
@@ -38,12 +37,10 @@ namespace Vehicle{
                 motors.Speed(MOTOR_RIGHT, 0.50);
                 delay(200);
                 Serial.println("MonteeAvecLanceur - Waiting for undetect...");
-                bottomOpticalSensor.WaitForUndetect();
-                Serial.println(bottomOpticalSensor.AnalogValue());
+                bottomSensor.WaitForUndetect();
                 delay(200);
                 Serial.println("MonteeAvecLanceur - Waiting for detect...");
-                bottomOpticalSensor.WaitForDetect();
-                Serial.println(bottomOpticalSensor.AnalogValue());
+                bottomSensor.WaitForDetect();
                 End();
             };
         };
@@ -58,17 +55,15 @@ namespace Vehicle{
                 motors.Speed(MOTOR_RIGHT, -0.20);
                 delay(200);
                 Serial.print("DecenteAvecLanceur - Waiting for undetect... ");
-                bottomOpticalSensor.WaitForUndetect();
-                Serial.println(bottomOpticalSensor.AnalogValue());
+                bottomSensor.WaitForUndetect();
                 motors.Speed(MOTOR_LEFT, 0);
                 motors.Speed(MOTOR_RIGHT, 0);
                 delay(1000);
-                motors.Speed(MOTOR_LEFT, -0.33);
-                motors.Speed(MOTOR_RIGHT, -0.33);
+                motors.Speed(MOTOR_LEFT, -0.40);
+                motors.Speed(MOTOR_RIGHT, -0.40);
                 delay(500);
                 Serial.print("DecenteAvecLanceur - Waiting for detect... ");
-                bottomOpticalSensor.WaitForDetect();
-                Serial.println(bottomOpticalSensor.AnalogValue());
+                bottomSensor.WaitForDetect();
                 motors.Speed(MOTOR_LEFT, 0);
                 motors.Speed(MOTOR_RIGHT, 0);
 
@@ -83,13 +78,13 @@ namespace Vehicle{
             void Execute()
             {
                 static const unsigned long startTime        = millis();
-                static const unsigned int nbStep            = 3;
+                static const unsigned int nbStep            = 4;
 
-                static const float leftSpeeds[nbStep]       = { -0.25, 0.25, 0.30 };
+                static const float leftSpeeds[nbStep]       = { 0.30, -0.25, -0.05, 0.30 };
 
-                static const float rightSpeeds[nbStep]      = { 0.45, 0.45, 0.30 };
+                static const float rightSpeeds[nbStep]      = { 0.30, 0.55, 0.45, 0.30 };
 
-                static const unsigned long timing[nbStep]   = { 1900, 3100, 3102 };
+                static const unsigned long timing[nbStep]   = { 100, 1900, 3100, 3102 };
 
                 motors.RunSpeedScript(nbStep, leftSpeeds, rightSpeeds, timing, startTime);
 
@@ -107,6 +102,7 @@ namespace Vehicle{
         class AlignmentReedSwitchZoneLancement : public State{
         public:
             const static unsigned long TARGET = 0b0100;
+            const static unsigned long TARGET_MASK = (TARGET << 1) - 1; // If you want to make it 0b0100, you Have to use target mask 0b0111.
 
             AlignmentReedSwitchZoneLancement() : State(){};
 
@@ -120,19 +116,19 @@ namespace Vehicle{
                 Serial.println("starting");
                 while(value != TARGET){
                     if(impulsion_time < millis()-lastTargetCheck){
-                        Serial.print("not target ");
-                        Serial.println(value, BIN);
                         //This loop will position the vehicle, step by step (w/ impulsions).
                         motors.Speed(MOTOR_LEFT, 0);
                         motors.Speed(MOTOR_RIGHT, 0);
+                            Serial.println(value,BIN);
+                            Serial.println(TARGET,BIN);
                         if(value == 0){
                             //We lost the signal, let's continue what we were doing.
                             speed = lastSpeed;
                         }
-                        else if(value > TARGET){
+                        else if(value > TARGET_MASK){
                             speed = - MIN_SPEED;
                         }
-                        else if(value < TARGET){
+                        else if(value < TARGET_MASK){
                             speed = + MIN_SPEED;
                         }
                         else{
