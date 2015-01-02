@@ -40,7 +40,7 @@ void Store::ServoUnloadBag(){
   servoPosition += STORE_SERVO_MICROS_STEP;
   servo.writeMicroseconds(servoPosition + STORE_SERVO_MICROS_STEP * STORE_OVERSHOOTING_UNLOAD_BAG);
   delay(STORE_OVERSHOOTING_UNLOAD_BAG_DELAY);
-  servo.writeMicroseconds(servoPosition);
+  servo.writeMicroseconds(servoPosition + STORE_SERVO_MICROS_STEP * 0.25);
 }
 
 void Store::ServoMoveBag(){ // For testing purposes only.

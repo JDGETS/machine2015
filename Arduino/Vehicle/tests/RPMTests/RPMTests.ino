@@ -16,6 +16,6 @@ void setup()
  
 void loop() 
 {
-  Serial.println(state.ReadRPM(&first, &second));
+  Serial.println(state.ReadRPM( 4 ));
 } 
 

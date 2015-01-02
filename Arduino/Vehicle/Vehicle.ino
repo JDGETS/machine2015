@@ -9,9 +9,10 @@ LinearStateMachine* machine = 0;
 
 void LoadStateMachine(){
   machine = new LinearStateMachine();
-  if(false) // If Shooter is detected
+  if(true) // If Shooter is detected
   {
     machine->Add(new Charging());
+    //To-do: add transition state that ignores the IR bottom sensor.
     machine->Add(new ParcoursAvecLanceur());
     machine->Add(new MonteeAvecLanceur());
     machine->Add(new DecenteAvecLanceur());  

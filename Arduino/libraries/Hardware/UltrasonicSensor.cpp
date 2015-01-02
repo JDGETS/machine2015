@@ -17,7 +17,7 @@ float & UltrasonicSensor::ReadInput()
   _DistanceValue = sonar.ping() / US_ROUNDTRIP_CM;
 
   bool detected = (_DistanceValue < MIN_TRIGGER_VALUE && _DistanceValue != 0 );
-
+//Serial.print(_DistanceValue);Serial.print(",");
   if(_DistanceValue == 0){
     consecutiveZeros++;
     if(consecutiveZeros < CONSECUTIVE_ZEROS_N){

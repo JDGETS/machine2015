@@ -1,4 +1,5 @@
 #include <Servo.h>
+
 #include "Hardware.h"
 #include "Vehicle.h"
 #include "AllStates.h"
@@ -12,8 +13,8 @@ void setup()
   States::Charging charging;
   Serial.println("Starting Charging.");
   charging.Execute();
- 
-  States::NewShooting shooting;
+  
+  States::Shooting shooting;
   Serial.println("Starting Shooting.");
   shooting.Execute();
 }

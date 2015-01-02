@@ -52,32 +52,34 @@
 #define STORE_MAX_NUMBER_OF_BAGS    8
 // STORE_OVERSHOOTING_*: 
 //   Use `bagsPercent` if you want to write a formula based on number of bags in the Store. 
-#define STORE_OVERSHOOTING_LOAD_BAG         0.55*bagsPercent
-#define STORE_OVERSHOOTING_LOAD_BAG_DELAY   550 + 300 * bagsPercent 
-#define STORE_OVERSHOOTING_UNLOAD_BAG       0.55*bagsPercent + 0.2
-#define STORE_OVERSHOOTING_UNLOAD_BAG_DELAY 700 + 150 * (bagsPercent)
+#define STORE_OVERSHOOTING_LOAD_BAG         0.60*bagsPercent
+#define STORE_OVERSHOOTING_LOAD_BAG_DELAY   550 + 450 * bagsPercent 
+#define STORE_OVERSHOOTING_UNLOAD_BAG       0.60*bagsPercent + 0.3
+#define STORE_OVERSHOOTING_UNLOAD_BAG_DELAY 650 + 450 * bagsPercent 
 
 // Charging
 #define CHARGING_SWITCH_TO_STORE_DELAY  400   // Time it takes to charge and shoot the bag and time until it reaches the hole (millis)
 #define CHARGING_DONE_DELAY             1000  // Delay after the vehicle is done charging before transitioning into the next state.
 
 // Shooter constants
-#define SHOOTER_TARGET_MIN_RPM 17
-#define SHOOTER_TARGET_MAX_RPM 18.5
+#define SHOOTER_TARGET_MIN_RPM 15
+#define SHOOTER_TARGET_MAX_RPM 20
+#define SHOOTING_START_DELAY_STABILIZE  1000
+#define NUMBER_OF_HOLES_TO_CALIBRATE    5
 #define SHOOTER_USE_ULTRASONIC // Comment this out to use the OpticalSensor
 #ifdef SHOOTER_USE_ULTRASONIC // Ultrasonic
 #define SHOOTER_US_SENSOR_MAX_DISTANCE  20
 #define SHOOTER_US_SENSOR_MIN_TRIGGER_VALUE 25
-#define SHOOTER_SENSOR_DEBOUNCE_TIME    300
+#define SHOOTER_SENSOR_DEBOUNCE_TIME    200
 #define SHOOTER_MOTOR_REQUIRED_TIME     700   // Time required to power the motor
-#define SHOOTER_LOAD_AND_SHOOT_DELAY    300   // Time it takes to charge and shoot the bag and time until it reaches the hole (millis)
+#define SHOOTER_LOAD_AND_SHOOT_DELAY    (390 + (rpm-12)*250/6)  // Time it takes to charge and shoot the bag and time until it reaches the hole (millis)
                                               // If it cuts too late, no big deal, the elastic will bring it back to initial position
                                               // Is dependant on sensor placement.
 #else // Optical
 #define SHOOTER_OPT_SENSOR_MIN_TRIGGER_VALUE 2.0
 #define SHOOTER_SENSOR_DEBOUNCE_TIME    100
 #define SHOOTER_MOTOR_REQUIRED_TIME     700   // Time required to power the motor
-#define SHOOTER_LOAD_AND_SHOOT_DELAY    100   // Time it takes to charge and shoot the bag and time until it reaches the hole (millis)
+#define SHOOTER_LOAD_AND_SHOOT_DELAY    800   // Time it takes to charge and shoot the bag and time until it reaches the hole (millis)
                                               // If it cuts too late, no big deal, the elastic will bring it back to initial position
                                               // Is dependant on sensor placement.
 #endif
@@ -90,7 +92,7 @@
 #define VEHICLE_SERVO_DELAY             2000  // Delay required to drop the shooter on the ground
 
 // Racing
-#define RACING_LEFT_MOTOR_SPEED 0.65
+#define RACING_LEFT_MOTOR_SPEED 0.65 // If there's no imperfection in the track.
 #define RACING_RIGHT_MOTOR_SPEED 0.60
 
 namespace Vehicle{
