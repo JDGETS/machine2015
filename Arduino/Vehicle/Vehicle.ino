@@ -1,4 +1,5 @@
 #include <Servo.h>
+#include "ForceStopVehicle.h"
 #include "Hardware.h"
 #include "Vehicle.h"
 #include "AllStates.h"
@@ -9,19 +10,20 @@ LinearStateMachine* machine = 0;
 
 void LoadStateMachine(){
   machine = new LinearStateMachine();
-  if(true) // If Shooter is detected
+  if(shooterSwitch.ReadInput()) // If Shooter is detected
   {
+    Serial.println("Loading shooting state machine.");
     machine->Add(new Charging());
-    //To-do: add transition state that ignores the IR bottom sensor.
     machine->Add(new ParcoursAvecLanceur());
     machine->Add(new MonteeAvecLanceur());
     machine->Add(new DecenteAvecLanceur());  
     machine->Add(new VirageEntreeZoneLancement());
     machine->Add(new AlignmentReedSwitchZoneLancement());
-    machine->Add(new NewShooting());
+    machine->Add(new Shooting());
   }
   else
   {
+    Serial.println("Loading racing state machine.");
     machine->Add(new Racing());
   }
 }
@@ -38,17 +40,23 @@ void setup()
   
   Vehicle::Setup();
   
+  Serial.println("Loading state machine.");
+  
   LoadStateMachine();
-}
+}'
  
 void loop() 
 {
-  if(machine == 0)
+  if(machine == 0 && !forceStopSwitch.ReadInput())
   {
-    if(false)
-    { //Monitor reset button (?)
+      if(FORCE_STOP)
+      {
+        Serial.println("Waiting for signal to go back on");
+        forceStopSwitch.WaitForPress();
+        Vehicle::FORCE_STOP = false;
+      }
+      delay(4000);
       LoadStateMachine();
-    }
   }
   else
   {

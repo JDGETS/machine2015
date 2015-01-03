@@ -1,7 +1,11 @@
 #include "Vehicle.h"
 
 namespace Vehicle{
+  bool FORCE_STOP = false;
+  bool COMPLETED_CHARGING = false;
   Motors motors(RIGHT_MOTOR_PIN_OUT, LEFT_MOTOR_PIN_OUT);
+  LimitSwitch shooterSwitch(SHOOTER_SWITCH_PIN);
+  LimitSwitch forceStopSwitch(VEHICLE_FORCESTOP_SWITCH_PIN, FORCESTOP_SWITCH_DEBOUNCE_TIME);
   VehicleReedSwitches reedswitches(REEDSWITCH_4, REEDSWITCH_3, REEDSWITCH_2, REEDSWITCH_1); // Order of a binary number.
 #ifdef VEHICLE_USE_ULTRASONIC
   UltrasonicSensor bottomSensor(VEHICLE_US_SENSOR_TRIGGER_PIN, VEHICLE_US_SENSOR_ECHO_PIN, VEHICLE_US_SENSOR_MAX_DISTANCE);
@@ -15,7 +19,16 @@ namespace Vehicle{
 #else
   OpticalSensor shooterSensor(SHOOTER_OPTICAL_SENSOR_PIN);
 #endif
-  //Servo vehicleServo; // Used to drop the shooter
+
+  void CheckForceStop(){
+    if(!FORCE_STOP && !forceStopSwitch.ReadInput())
+    {
+      Serial.println("Vehicle force stopped!");
+      FORCE_STOP = true;
+      Stop();
+      delay(2000);
+    }
+  }
 
   void Setup(){
     //Init motor before servos (interference)
@@ -23,6 +36,10 @@ namespace Vehicle{
     digitalWrite(SHOOTER_MOTOR_MOSFET, LOW);
 
     motors.Setup();
+
+    shooterSwitch.Setup();
+
+    forceStopSwitch.Setup();
 
     bottomSensor.Setup();
 #ifdef VEHICLE_USE_ULTRASONIC
@@ -48,9 +65,13 @@ namespace Vehicle{
   #endif
 
     reedswitches.Setup();
+  }
 
-    //Configure the right values first.
-    //vehicleServo.writeMicroseconds(VEHICLE_SERVO_INITIAL_MICROS);
-    //vehicleServo.attach(VEHICLE_SERVO_PIN, VEHICLE_SERVO_MIN_MICROS, VEHICLE_SERVO_MAX_MICROS);
+
+  void Stop()
+  {
+    motors.Speed(MOTOR_LEFT, 0);
+    motors.Speed(MOTOR_RIGHT, 0);
+    digitalWrite(SHOOTER_MOTOR_MOSFET, LOW);
   }
 }

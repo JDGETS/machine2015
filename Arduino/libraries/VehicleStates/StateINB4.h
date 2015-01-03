@@ -23,7 +23,9 @@ namespace Vehicle{
                 motors.Speed(MOTOR_LEFT, 0.40);
                 motors.Speed(MOTOR_RIGHT, 0.40);
                 Serial.println("ParcoursAvecLanceur - Waiting for detect...");
+                delay(3000); // Ignore IR for a while (station de recharge)
                 bottomSensor.WaitForDetect();
+                CHECK_FORCE_STOP_MACRO
                 End();
             };
         };
@@ -38,9 +40,11 @@ namespace Vehicle{
                 delay(200);
                 Serial.println("MonteeAvecLanceur - Waiting for undetect...");
                 bottomSensor.WaitForUndetect();
+                CHECK_FORCE_STOP_MACRO
                 delay(200);
                 Serial.println("MonteeAvecLanceur - Waiting for detect...");
                 bottomSensor.WaitForDetect();
+                CHECK_FORCE_STOP_MACRO
                 End();
             };
         };
@@ -54,16 +58,18 @@ namespace Vehicle{
                 motors.Speed(MOTOR_LEFT, -0.20);
                 motors.Speed(MOTOR_RIGHT, -0.20);
                 delay(200);
-                Serial.print("DecenteAvecLanceur - Waiting for undetect... ");
+                Serial.println("DecenteAvecLanceur - Waiting for undetect... ");
                 bottomSensor.WaitForUndetect();
+                CHECK_FORCE_STOP_MACRO
                 motors.Speed(MOTOR_LEFT, 0);
                 motors.Speed(MOTOR_RIGHT, 0);
                 delay(1000);
                 motors.Speed(MOTOR_LEFT, -0.40);
                 motors.Speed(MOTOR_RIGHT, -0.40);
                 delay(500);
-                Serial.print("DecenteAvecLanceur - Waiting for detect... ");
+                Serial.println("DecenteAvecLanceur - Waiting for detect... ");
                 bottomSensor.WaitForDetect();
+                CHECK_FORCE_STOP_MACRO
                 motors.Speed(MOTOR_LEFT, 0);
                 motors.Speed(MOTOR_RIGHT, 0);
 
@@ -87,6 +93,8 @@ namespace Vehicle{
                 static const unsigned long timing[nbStep]   = { 100, 1900, 3100, 3102 };
 
                 motors.RunSpeedScript(nbStep, leftSpeeds, rightSpeeds, timing, startTime);
+
+                CHECK_FORCE_STOP_MACRO
 
                 if (reedswitches.GetValue() != 0) 
                 {
@@ -140,6 +148,7 @@ namespace Vehicle{
                         motors.Speed(MOTOR_RIGHT, speed);
                         lastTargetCheck = millis();
                         lastSpeed = speed;
+                        CHECK_FORCE_STOP_MACRO
                     }
                     value = reedswitches.GetValue();
                 }

@@ -1,3 +1,4 @@
+#include "ForceStopVehicle.h"
 #include <UltrasonicSensor.h>
 #include <NewPing.h>
 
@@ -51,7 +52,7 @@ void UltrasonicSensor::WaitForDetect()
 {
   while(millis() < lastStatusChange + DEBOUNCE_TIME); //Debounce
   ReadInput();
-  while(!IsDetected()){ delay(WAIT_READ_DELAY); ReadInput(); }
+  while(!IsDetected()){ delay(WAIT_READ_DELAY); ReadInput(); CHECK_FORCE_STOP_MACRO; }
   lastStatusChange = millis();
 }
 
@@ -59,6 +60,6 @@ void UltrasonicSensor::WaitForUndetect()
 {
   while(millis() < lastStatusChange + DEBOUNCE_TIME); //Debounce
   ReadInput();
-  while(IsDetected()){ delay(WAIT_READ_DELAY); ReadInput(); }
+  while(IsDetected()){ delay(WAIT_READ_DELAY); ReadInput(); CHECK_FORCE_STOP_MACRO; }
   lastStatusChange = millis();
 }

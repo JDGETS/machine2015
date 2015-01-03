@@ -42,6 +42,7 @@ namespace Vehicle{
           Serial.print("Next shooting time: ");
           Serial.println(nextShootingTime);
           delay(nextShootingTime - millis() - SHOOTER_LOAD_AND_SHOOT_DELAY);
+          CHECK_FORCE_STOP_MACRO
           Serial.println("Starting to crinque");
           digitalWrite(SHOOTER_MOTOR_MOSFET, HIGH);
           delay(SHOOTER_MOTOR_REQUIRED_TIME); // If it cuts too late, no big deal, the elastic will bring it back to initial position
@@ -52,9 +53,11 @@ namespace Vehicle{
           delay(SHOOTER_MOTOR_RDY_TO_RECV_DELAY); // Delay to be sure the system is ready to receive the new bag. EDIT: Not necessary since we're waiting at least a full hole. EDIT2: Gros cave, c'est pour pas que ça tombe entre le launcher et la craque.
           DropNextBag();
           shooterSensor.WaitForDetect();
+          CHECK_FORCE_STOP_MACRO
           Serial.println("Waiting for calibration hole...");
           shooterSensor.WaitForUndetect();
           shooterSensor.WaitForDetect(); // Wait one full turn
+          CHECK_FORCE_STOP_MACRO
           nextHoleTime = millis(); // Realign "nextHoleTime" at the end
           nextShootingTime = GetNextShootingTime();
         }
@@ -127,6 +130,7 @@ namespace Vehicle{
         hole->beginning = millis();
         Serial.println("StateShooting - Wait for detect");
         shooterSensor.WaitForDetect();
+        CHECK_FORCE_STOP_MACRO
         hole->end = millis();
         hole->time = hole->end - hole->beginning;
       }

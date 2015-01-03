@@ -8,12 +8,13 @@
 #include <State.h>
 
 // Pins
-#define VEHICLE_SERVO_PIN             x
+#define VEHICLE_FORCESTOP_SWITCH_PIN  52
+#define SHOOTER_SWITCH_PIN            48
+#define STORE_DETECT_BAG_SWITCH_PIN   50
 #define VEHICLE_OPTICAL_SENSOR_PIN    A9
 #define VEHICLE_US_SENSOR_TRIGGER_PIN 42
 #define VEHICLE_US_SENSOR_ECHO_PIN    40
 #define STORE_SERVO_PIN               5
-#define STORE_DETECT_BAG_SWITCH_PIN   48
 #define SHOOTER_OPTICAL_SENSOR_PIN    A8 
 #define SHOOTER_US_SENSOR_TRIGGER_PIN 46
 #define SHOOTER_US_SENSOR_ECHO_PIN    44
@@ -30,19 +31,18 @@
 #define REEDSWITCH_4 PairedReedSwitch(26, 24)
 
 // Servo configuration
-#define VEHICLE_SERVO_MIN_MICROS    600
-#define VEHICLE_SERVO_MAX_MICROS    2400 
 #define STORE_SERVO_MIN_MICROS      600
 #define STORE_SERVO_MAX_MICROS      2400 
 
 // Vehicle
+#define FORCESTOP_SWITCH_DEBOUNCE_TIME  1000
 //#define VEHICLE_USE_ULTRASONIC // Comment this out to use the OpticalSensor
 #ifdef VEHICLE_USE_ULTRASONIC // Ultrasonic
 #define VEHICLE_US_SENSOR_MAX_DISTANCE        15
 #define VEHICLE_US_SENSOR_MIN_TRIGGER_VALUE   8
 #define VEHICLE_US_SENSOR_CONSECUTIVE_ZEROS   3
 #else
-#define VEHICLE_OPT_SENSOR_MIN_TRIGGER_VALUE    0.15
+#define VEHICLE_OPT_SENSOR_MIN_TRIGGER_VALUE  0.15
 #endif
 
 // Store
@@ -96,15 +96,17 @@
 #define RACING_RIGHT_MOTOR_SPEED 0.60
 
 namespace Vehicle{
+  extern bool COMPLETED_CHARGING;
   extern Motors motors;
   extern Vehicle::Store store;
+  extern LimitSwitch forceStopSwitch;
+  extern LimitSwitch shooterSwitch;
   extern LimitSwitch storeBagInSwitch;
   #ifdef SHOOTER_USE_ULTRASONIC
   extern UltrasonicSensor shooterSensor;
   #else
   extern OpticalSensor shooterSensor;
   #endif
-  extern Servo vehicleServo;
   #ifdef VEHICLE_USE_ULTRASONIC
   extern UltrasonicSensor bottomSensor;
   #else
@@ -113,6 +115,7 @@ namespace Vehicle{
   extern VehicleReedSwitches reedswitches;
 
   void Setup();
+  void Stop();
 
   namespace States{};
 }

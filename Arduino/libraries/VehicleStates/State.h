@@ -1,5 +1,7 @@
 #ifndef STATE_H
 #define STATE_H
+#include "ForceStopVehicle.h"
+#include <Vehicle.h>
 
 namespace Vehicle
 {
@@ -18,6 +20,9 @@ namespace Vehicle
 
         virtual void Update() 
         { 
+          if(FORCE_STOP){
+            _active = false;
+          }
           return;
         };
 
@@ -44,7 +49,6 @@ namespace Vehicle
 
       class LinearStateMachine
       {
-        //static const int NULL = 0;
         int count;
         LinearStateMachineNode* root;
 

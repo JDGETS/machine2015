@@ -1,3 +1,4 @@
+#include "ForceStopVehicle.h"
 #include "OpticalSensor.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -75,18 +76,29 @@ void OpticalSensor::WaitForDetect()
 {
   while(millis() < lastStatusChange + DEBOUNCE_TIME); //Debounce
   if(useLongRead)
-    while(!LongReadInput(false));
+    while(!LongReadInput(false)) {
+      CHECK_FORCE_STOP_MACRO
+    }
   else
-    while(!IsDetected()) ReadInput();
+    while(!IsDetected()){ 
+      ReadInput(); 
+      CHECK_FORCE_STOP_MACRO
+    }
   lastStatusChange = millis();
 }
 
 void OpticalSensor::WaitForUndetect()
 {
   while(millis() < lastStatusChange + DEBOUNCE_TIME); //Debounce
-  if(useLongRead)
-    while(LongReadInput(true));
+  if(useLongRead){
+    while(LongReadInput(true)){
+      CHECK_FORCE_STOP_MACRO;
+    };
+  }
   else
-    while(IsDetected()) ReadInput();
+    while(IsDetected()){ 
+      ReadInput(); 
+      CHECK_FORCE_STOP_MACRO; 
+    }
   lastStatusChange = millis();
 }

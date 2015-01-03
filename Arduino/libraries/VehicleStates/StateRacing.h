@@ -14,6 +14,7 @@ namespace Vehicle{
       {
         MOTORS.Speed(MOTOR_LEFT, RACING_LEFT_MOTOR_SPEED);
         MOTORS.Speed(MOTOR_RIGHT, RACING_RIGHT_MOTOR_SPEED);
+        CHECK_FORCE_STOP_MACRO
         // Never call End();
         return;
       }

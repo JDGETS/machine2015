@@ -18,7 +18,7 @@ void Store::Setup(){
 };
 
 void Store::Initialize(){
-  unsigned long wait = STORE_INITIALIZE_DELAY - (millis() - setupTime);
+  long wait = STORE_INITIALIZE_DELAY - (millis() - setupTime);
   if(wait > 0)
     delay(wait); //Wait for store to align itself (setup)
   servoPosition += STORE_SERVO_MICROS_STEP*3; //Get rid of deadzone when changing directions
