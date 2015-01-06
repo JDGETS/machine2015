@@ -43,20 +43,22 @@ void setup()
   Serial.println("Loading state machine.");
   
   LoadStateMachine();
-}'
+}
  
 void loop() 
 {
-  if(machine == 0 && !forceStopSwitch.ReadInput())
-  {
-      if(FORCE_STOP)
-      {
-        Serial.println("Waiting for signal to go back on");
-        forceStopSwitch.WaitForPress();
-        Vehicle::FORCE_STOP = false;
-      }
-      delay(4000);
-      LoadStateMachine();
+  if(machine == 0){
+   if(!forceStopSwitch.ReadInput())
+    {
+        if(FORCE_STOP)
+        {
+          Serial.println("Waiting for signal to go back on");
+          forceStopSwitch.WaitForPress();
+          Vehicle::FORCE_STOP = false;
+        }
+        delay(4000);
+        LoadStateMachine();
+    }
   }
   else
   {

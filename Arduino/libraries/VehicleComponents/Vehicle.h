@@ -46,7 +46,7 @@
 #endif
 
 // Store
-#define STORE_SERVO_INITIAL_MICROS  633   // Must be close enough to 600 (STORE_SERVO_MIN_MICROS) - Is sometimes 613 or 620
+#define STORE_SERVO_INITIAL_MICROS  629   // Must be close enough to 600 (STORE_SERVO_MIN_MICROS) - Is sometimes 613 or 620
 #define STORE_INITIALIZE_DELAY      4500  // Time to reinitialize the store to STORE_SERVO_INITIAL_MICROS
 #define STORE_SERVO_MICROS_STEP     27    // For 1/8 rotation
 #define STORE_MAX_NUMBER_OF_BAGS    8

@@ -23,7 +23,10 @@ namespace Vehicle{
                 motors.Speed(MOTOR_LEFT, 0.40);
                 motors.Speed(MOTOR_RIGHT, 0.40);
                 Serial.println("ParcoursAvecLanceur - Waiting for detect...");
+                #ifndef PARCOURS_IGNORE_IR
+                Serial.println("Ignoring IR for 3 seconds.");
                 delay(3000); // Ignore IR for a while (station de recharge)
+                #endif
                 bottomSensor.WaitForDetect();
                 CHECK_FORCE_STOP_MACRO
                 End();
@@ -90,7 +93,7 @@ namespace Vehicle{
 
                 static const float rightSpeeds[nbStep]      = { 0.30, 0.55, 0.45, 0.30 };
 
-                static const unsigned long timing[nbStep]   = { 100, 1900, 3100, 3102 };
+                static const unsigned long timing[nbStep]   = { 125, 1900, 3100, 3102 };
 
                 motors.RunSpeedScript(nbStep, leftSpeeds, rightSpeeds, timing, startTime);
 
@@ -116,9 +119,9 @@ namespace Vehicle{
 
             void Execute() {
                 unsigned long value = reedswitches.GetValue();
-                unsigned long impulsion_time = 100;
+                unsigned long impulsion_time = 70;
                 unsigned long lastTargetCheck = millis() - impulsion_time - 1;
-                float MIN_SPEED = 0.25;
+                float MIN_SPEED = 0.20;
                 float speed = MIN_SPEED;
                 float lastSpeed = speed;
                 Serial.println("starting");
@@ -127,8 +130,8 @@ namespace Vehicle{
                         //This loop will position the vehicle, step by step (w/ impulsions).
                         motors.Speed(MOTOR_LEFT, 0);
                         motors.Speed(MOTOR_RIGHT, 0);
-                            Serial.println(value,BIN);
-                            Serial.println(TARGET,BIN);
+                        Serial.println(value,BIN);
+                        Serial.println(TARGET,BIN);
                         if(value == 0){
                             //We lost the signal, let's continue what we were doing.
                             speed = lastSpeed;

@@ -1,3 +1,5 @@
+#define PARCOURS_IGNORE_IR 1
+
 #include <Servo.h>
 #include "Hardware.h"
 #include "Vehicle.h"
