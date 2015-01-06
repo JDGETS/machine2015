@@ -1,14 +1,19 @@
 #include <Servo.h>
+#include "ForceStopVehicle.h"
 #include "LimitSwitch.h"
+#include "ForceStopVehicle.h"
+#include "Hardware.h"
+#include "Vehicle.h"
+#include "AllStates.h"
 
 //////// Pins //////// 
-#define ELEVATOR_SWITCH_PIN     38
-#define DOOR_SWITCH_PIN         36
+#define ELEVATOR_SWITCH_PIN     34
 #define BAG_SWITCH_PIN          32
-#define ELEVATOR_PIN            9
-#define DOOR_PIN                10
+#define DRILL_PIN               11
+#define ELEVATOR_PIN            10
 #define CONVEYOR1_PIN           6
-#define CONVEYOR2_PIN           7
+#define CONVEYOR2_PIN           4
+#define CONVEYOR2_MOTOR_PIN     9
 
 //////// PWM //////// 
 #define CONVEYOR_RUN   1400
@@ -16,7 +21,6 @@
 
 //////// Variables //////// 
 LimitSwitch elevatorSwitch(ELEVATOR_SWITCH_PIN);
-LimitSwitch doorSwitch(DOOR_SWITCH_PIN);
 Servo conveyor1;
 Servo conveyor2;
 
@@ -25,48 +29,47 @@ unsigned long conveyor1_stopped_until = 0;
 unsigned long CONVEYOR1_RUNTIME = 1000;
 unsigned long CONVEYOR1_STOPTIME = 3000;
 
-
 void setup() {    
   Serial.begin(9600);
   
   elevatorSwitch.Setup();
-  doorSwitch.Setup();
   
   pinMode(ELEVATOR_PIN, OUTPUT);
-  pinMode(DOOR_PIN, OUTPUT);
   digitalWrite(ELEVATOR_PIN, LOW);
-  digitalWrite(DOOR_PIN, LOW);
+  pinMode(DRILL_PIN, OUTPUT);
+  digitalWrite(DRILL_PIN, LOW);
+  pinMode(CONVEYOR2_MOTOR_PIN, OUTPUT);
+  digitalWrite(CONVEYOR2_MOTOR_PIN, LOW);
   
   conveyor1.writeMicroseconds(CONVEYOR_STOP); // Set initial position
   conveyor1.attach(CONVEYOR1_PIN);
   
   conveyor2.writeMicroseconds(CONVEYOR_STOP); // Set initial position
   conveyor2.attach(CONVEYOR2_PIN);
+  
+  pinMode(CONVEYOR2_MOTOR_PIN, OUTPUT);
+  digitalWrite(CONVEYOR2_MOTOR_PIN, HIGH);
+  
+  //Drill time
+  digitalWrite(DRILL_PIN, HIGH);
+  delay(4000);
+  digitalWrite(DRILL_PIN, LOW);
 }
 
-void loop(){  
-  // La porte est ouverte
-  if ( ! doorSwitch.ReadInput() )
-  {
-    Serial.println("Elevator door opened. Closing...");
-    // On la ferme et on attend
-    conveyor1.writeMicroseconds(CONVEYOR_STOP);
-    digitalWrite(DOOR_PIN, HIGH);
-    doorSwitch.WaitForPress();
-    digitalWrite(DOOR_PIN, LOW);
-    Serial.println("Elevator door closed.");
-  }
-  else{
+void loop(){
+    digitalWrite(CONVEYOR2_MOTOR_PIN, HIGH);
     // L'ascenseur n'est pas en haut
     if ( ! elevatorSwitch.ReadInput() )
     {
+      Serial.println("Elevator not at the top... Going up.");
       // Arreter le tapis sur l'ascenseur (au cas ou il roulerait...)
+      conveyor1.writeMicroseconds(CONVEYOR_STOP);
       conveyor2.writeMicroseconds(CONVEYOR_STOP);
       // On monte l'ascenseur et on attend
       Serial.println("Starting elevator.");
-      conveyor1.writeMicroseconds(CONVEYOR_STOP);
       digitalWrite(ELEVATOR_PIN, HIGH);
       elevatorSwitch.WaitForPress();
+      Serial.println("Elevator at the top... Shutting down motors.");
       // Arreter l'ascenseur
       digitalWrite(ELEVATOR_PIN, LOW); 
       Serial.println("Stopping elevator.");
@@ -74,6 +77,7 @@ void loop(){
       conveyor1_running_until = millis();
     }
     else{
+      Serial.println("Starting conveyors.");
       // Si les deux switches sont appuyées, on roule les deux tapis avec un petit pattern sur le premier.
       if(conveyor1_running_until != 0 && conveyor1_running_until < millis())
       {
@@ -91,5 +95,4 @@ void loop(){
       }
       conveyor2.writeMicroseconds(CONVEYOR_RUN);
     }
-  }
 }
