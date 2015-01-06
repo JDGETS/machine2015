@@ -19,8 +19,6 @@ float & OpticalSensor::ReadInput()
   if(_Inverted)
     _AnalogValue = 5 - _AnalogValue;
 
-  Serial.println(_AnalogValue);
-
   _Detected = (_AnalogValue < MIN_TRIGGER_VALUE );
 
   return _AnalogValue;

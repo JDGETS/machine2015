@@ -69,7 +69,7 @@ namespace Vehicle{
                 delay(1000);
                 motors.Speed(MOTOR_LEFT, -0.40);
                 motors.Speed(MOTOR_RIGHT, -0.40);
-                delay(500);
+                delay(200);
                 Serial.println("DecenteAvecLanceur - Waiting for detect... ");
                 bottomSensor.WaitForDetect();
                 CHECK_FORCE_STOP_MACRO

@@ -48,7 +48,7 @@ void setup()
 void loop() 
 {
   if(machine == 0){
-   if(!forceStopSwitch.ReadInput())
+    if(!forceStopSwitch.ReadInput())
     {
         if(FORCE_STOP)
         {
