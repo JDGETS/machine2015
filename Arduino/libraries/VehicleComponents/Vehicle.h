@@ -72,7 +72,7 @@
 #define SHOOTER_US_SENSOR_MIN_TRIGGER_VALUE 25
 #define SHOOTER_SENSOR_DEBOUNCE_TIME    200
 #define SHOOTER_MOTOR_REQUIRED_TIME     700   // Time required to power the motor
-#define SHOOTER_LOAD_AND_SHOOT_DELAY    (390 + (rpm-12)*250/6)  // Time it takes to charge and shoot the bag and time until it reaches the hole (millis)
+#define SHOOTER_LOAD_AND_SHOOT_DELAY    (385 + (rpm-12)*250/6)  // Time it takes to charge and shoot the bag and time until it reaches the hole (millis)
                                               // If it cuts too late, no big deal, the elastic will bring it back to initial position
                                               // Is dependant on sensor placement.
 #else // Optical
@@ -93,7 +93,7 @@
 
 // Racing
 #define RACING_LEFT_MOTOR_SPEED 0.65 // If there's no imperfection in the track.
-#define RACING_RIGHT_MOTOR_SPEED 0.60
+#define RACING_RIGHT_MOTOR_SPEED 0.55
 
 namespace Vehicle{
   extern bool COMPLETED_CHARGING;
